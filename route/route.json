@@ -1,0 +1,8 @@
+[
+  {
+    "path": "/",
+    "method": "get",
+    "module": "index",
+    "handler": "entry"
+  }
+]
