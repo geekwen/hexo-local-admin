@@ -3,8 +3,8 @@
 module.exports = (function () {
     var config = {};
 
-    config.rootPath = "";
-    config.theme = "";
+    config.rootPath = "/Users/Geekwen/Sites/test/hexo";
+    config.theme = "landscape";
 
     config.adminPath = __dirname;
     config.siteConfig = config.rootPath + '/_config.yml';

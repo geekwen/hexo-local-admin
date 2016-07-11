@@ -8,6 +8,14 @@
 </head>
 <body>
 
+<div id="content-detail-wrap">
+    <div id="content-detail-inner">
+        <div id="content-detail-head"><span id="close-detail">&times;</span></div>
+        <div id="content-detail-body"></div>
+        <div id="content-detail-foot"></div>
+    </div>
+</div>
+
 <header class="jumbotron">
     <div class="container">
         <h1>Hexo Admin</h1>
@@ -77,7 +85,9 @@
             <div id="<%= contentType[i] %>-list" class="row" data-index="<%= i + 1 %>">
                 <% data[contentType[i]].forEach(function(item, index) { %>
                 <div class="col-sm-6 col-lg-4">
-                    <div class="f-item" title="<%= item.title %>" data-index="<%= index %>">
+                    <div class="f-item" title="<%= item.title %>"
+                         data-type="<%= contentType[i] %>"
+                         data-index="<%= index %>">
                         <% if (item.title){ %>
                         <h4><%= item.title %></h4>
                         <% } %>
@@ -123,6 +133,9 @@
         <p class="text-center">Have a nice day!</p>
     </div>
 </footer>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/entry.min.js"></script>
 
 </body>
 </html>

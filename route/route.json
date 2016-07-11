@@ -4,5 +4,11 @@
     "method": "get",
     "module": "index",
     "handler": "entry"
+  },
+  {
+    "path": "/get-markdown-file",
+    "method": "get",
+    "module": "index",
+    "handler": "getMarkdownFile"
   }
 ]
