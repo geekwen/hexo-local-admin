@@ -8,9 +8,12 @@
 </head>
 <body>
 
+<div id="alert" class="alert alert-warning" role="alert">warning!保存失败</div>
+
 <div id="content-detail-wrap">
     <div id="content-detail-inner">
-        <div id="content-detail-head"><span id="close-detail">&times;</span></div>
+        <span id="close-detail">&times;</span>
+        <div id="content-detail-head"></div>
         <div id="content-detail-body"></div>
         <div id="content-detail-foot"></div>
     </div>
@@ -37,89 +40,100 @@
 </header>
 
 <% if (data) { %>
-<main class="container">
-    <div class="row">
-        <div class="col-sm-3 col-sm-push-9">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">配置文件</h3>
-                </div>
-                <div class="panel-body">
-                    <p>site config</p>
-                    <p>theme config</p>
-                </div>
-            </div>
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">共有 <%= data.tags.length %> 个标签</h3>
-                </div>
-                <div class="panel-body">
-                    <ul class="list-inline list-action">
-                        <% for (var key in data.tags){ if (data.tags.hasOwnProperty(key) && key !== 'length'){ %>
-                        <li><%= key %>（<%= data.tags[key].length %>）</li>
-                        <% }} %>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-9 col-sm-pull-3">
-            <ul id="list-nav" class="nav nav-tabs" data-select="1">
-                <li role="presentation" class="active" data-index="1">
-                    <a href="javascript:void(0)">已发布（<%= data.posts.length %>）</a>
-                </li>
-                <li role="presentation" data-index="2">
-                    <a href="javascript:void(0)">页面（<%= data.pages.length %>）</a>
-                </li>
-                <li role="presentation" data-index="3">
-                    <a href="javascript:void(0)">草稿（<%= data.drafts.length %>）</a>
-                </li>
-                <li role="presentation" data-index="4">
-                    <a href="javascript:void(0)">回收站（<%= data.trash.length %>）</a>
-                </li>
-            </ul>
-
-            <% var contentType = ['posts', 'pages', 'drafts', 'trash']; %>
-            <% for (var i = 0; i < contentType.length; i++) { %>
-            <div id="<%= contentType[i] %>-list" class="row" data-index="<%= i + 1 %>">
-                <% data[contentType[i]].forEach(function(item, index) { %>
-                <div class="col-sm-6 col-lg-4">
-                    <div class="f-item" title="<%= item.title %>"
-                         data-type="<%= contentType[i] %>"
-                         data-index="<%= index %>">
-                        <% if (item.title){ %>
-                        <h4><%= item.title %></h4>
-                        <% } %>
-
-                        <% if (item.date) { %>
-                        <time>
-                            <span class="glyphicon glyphicon-time"></span>
-                            <small><%= item.date %></small>
-                        </time>
-                        <% } %>
-
-                        <% if (item.tags) { %>
-                        <div class="tags">
-                            <span class="glyphicon glyphicon-tag"></span>
-                            <% if (Array.isArray(item.tags)) { %>
-                            <% item.tags.forEach(function(tagName) { %>
-                            <span>#<%= tagName %></span>
-                            <% }); %>
-                            <% } else { %>
-                            <span>#<%= item.tags %></span>
-                            <% } %>
-                        </div>
-                        <% } %>
-
-                        <button class="delete btn btn-danger btn-xs" type="button">
-                            <span class="glyphicon glyphicon-trash"></span>
-                        </button>
+<main>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3 col-sm-push-9">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">写作</h3>
+                    </div>
+                    <div class="panel-body">
+                        <button type="button" id="add-new" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> 写文章</button>
                     </div>
                 </div>
-                <% }); %>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">查看配置文件</h3>
+                    </div>
+                    <div class="panel-body">
+                        <button type="button" class="view-config btn btn-default" data-type="site">站点配置</button>
+                        <button type="button" class="view-config btn btn-default" data-type="theme">主题配置</button>
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">共有 <%= data.tags.length %> 个标签</h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="list-inline list-action">
+                            <% for (var key in data.tags){ if (data.tags.hasOwnProperty(key) && key !== 'length'){ %>
+                            <li><%= key %>（<%= data.tags[key].length %>）</li>
+                            <% }} %>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <% } %>
+
+            <div class="col-sm-9 col-sm-pull-3">
+                <ul id="list-nav" class="nav nav-tabs" data-select="1">
+                    <li role="presentation" class="active" data-index="1">
+                        <a href="javascript:void(0)">已发布（<%= data.posts.length %>）</a>
+                    </li>
+                    <li role="presentation" data-index="2">
+                        <a href="javascript:void(0)">页面（<%= data.pages.length %>）</a>
+                    </li>
+                    <li role="presentation" data-index="3">
+                        <a href="javascript:void(0)">草稿（<%= data.drafts.length %>）</a>
+                    </li>
+                    <li role="presentation" data-index="4">
+                        <a href="javascript:void(0)">回收站（<%= data.trash.length %>）</a>
+                    </li>
+                </ul>
+
+                <% var contentType = ['posts', 'pages', 'drafts', 'trash']; %>
+                <% for (var i = 0; i < contentType.length; i++) { %>
+                <div id="<%= contentType[i] %>-list" class="row" data-index="<%= i + 1 %>">
+                    <% data[contentType[i]].forEach(function(item, index) { %>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="f-item" title="<%= item.title %>"
+                             data-type="<%= contentType[i] %>"
+                             data-index="<%= index %>">
+                            <% if (item.title){ %>
+                            <h4><%= item.title %></h4>
+                            <% } %>
+
+                            <% if (item.date) { %>
+                            <time>
+                                <span class="glyphicon glyphicon-time"></span>
+                                <small><%= item.date %></small>
+                            </time>
+                            <% } %>
+
+                            <% if (item.tags) { %>
+                            <div class="tags">
+                                <span class="glyphicon glyphicon-tag"></span>
+                                <% if (Array.isArray(item.tags)) { %>
+                                <% item.tags.forEach(function(tagName) { %>
+                                <span>#<%= tagName %></span>
+                                <% }); %>
+                                <% } else { %>
+                                <span>#<%= item.tags %></span>
+                                <% } %>
+                            </div>
+                            <% } %>
+
+                            <button class="delete btn btn-danger btn-xs" type="button">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <% }); %>
+                </div>
+                <% } %>
+            </div>
         </div>
     </div>
 </main>

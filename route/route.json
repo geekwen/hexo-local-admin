@@ -10,5 +10,17 @@
     "method": "get",
     "module": "index",
     "handler": "getMarkdownFile"
+  },
+  {
+    "path": "/get-config",
+    "method": "get",
+    "module": "index",
+    "handler": "getConfig"
+  },
+  {
+    "path": "/write-markdown-file",
+    "method": "post",
+    "module": "index",
+    "handler": "writeMarkdownFile"
   }
 ]

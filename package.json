@@ -16,8 +16,10 @@
   "author": "geekwen",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "ejs": "^2.4.2",
     "ejs-compiled-loader": "^2.1.1",
-    "express": "^4.14.0"
+    "express": "^4.14.0",
+    "extend": "^3.0.0"
   }
 }

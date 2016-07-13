@@ -3,11 +3,13 @@ const PORT = 4001;
 var fs = require('fs'),
     path = require('path'),
     express = require('express'),
+    body_parser = require('body-parser'),
     app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views/ejs'));
 app.use(express.static('views/public'));
+app.use(body_parser());
 
 require('./route/route.json').forEach(function (route) {
     app[route.method](route.path, require(path.join(__dirname, 'controller', route.module))[route.handler])

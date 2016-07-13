@@ -6,7 +6,8 @@
 const HEXO_PATH = require('../config');
 
 var fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    extend = require('extend');
 
 exports.updateDBFile = writeDB;
 
@@ -21,7 +22,9 @@ function getAllData() {
         posts: getDirMdFiles(HEXO_PATH.postPath),
         drafts: getDirMdFiles(HEXO_PATH.draftPath),
         trash: getDirMdFiles(HEXO_PATH.trashPath),
-        pages: getPages(HEXO_PATH.sourcePath)
+        pages: getPages(HEXO_PATH.sourcePath),
+        themeConfig: getFile(HEXO_PATH.themeConfig),
+        siteConfig: getFile(HEXO_PATH.siteConfig)
     };
 
     siteData.tags = getTagData(siteData.posts);
@@ -86,31 +89,13 @@ function getPages(sourcePath) {
 
         try {
             fs.accessSync(filePath, fs.F_OK);
-            data.push(getPostFileContent(path.join(sourcePath, item), 'index.md'));
+            data.push(extend(getPostFileContent(path.join(sourcePath, item), 'index.md'), {page_url: item}));
         } catch (e) {
             console.log('cant read file:' + filePath);
         }
     });
 
     return data.sort(sortListFromNewToOld);
-}
-
-/**
- * 获取所有回收站中的内容
- * @param {string} trashPath 回收站路径
- * @returns {object[]} array of trash content
- * */
-function getTrash(trashPath) {
-    var data = [];
-
-    try {
-        fs.accessSync(trashPath, fs.F_OK);
-        data = getDirMdFiles(trashPath);
-    } catch (e) {
-        fs.mkdirSync(trashPath);
-    }
-
-    return data;
 }
 
 /**
@@ -130,13 +115,6 @@ function getFile(filePath) {
 
     return fileContent;
 }
-
-/**
- * 添加新的标签 - 在第一次读取_post内容时，需要读取并记录好所有的标签
- * @param {string} tagName 验证标签名称
- * */
-/*
- }*/
 
 /**
  * 读取文章文件，并对内容进行分析、整理
@@ -163,6 +141,7 @@ function getPostFileContent(dirPath, fileName) {
         front_matter = front_matter[1];
 
     front_matter.split(/\n/).forEach(function (item) {
+        item = item.trim();
         if (!item) return;
         var attr = item.match(/^.*?(?=:)/)[0],
             value = item.replace(attr + ':', '').trim();

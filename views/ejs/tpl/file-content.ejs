@@ -1,1 +1,34 @@
-<div style="white-space: pre-line"><%- data.raw_content %></div>
+<% if (data.type) { %>
+<ul id="content-tool" class="list-action list-unstyled"
+    data-type="<%= data.type %>" data-index="<%= data.index %>">
+    <li id="t-edit">编辑</li>
+
+    <% if (data.type == 'posts'){ %>
+    <li id="t-unpublish">移动到草稿</li>
+    <% } else if (data.type == 'drafts') { %>
+    <li id="t-publish">发布到文章</li>
+    <li id="t-publish-page">发布到页面</li>
+    <% } else if (data.type == 'trash') { %>
+    <li id="t-restore">还原</li>
+    <% } %>
+
+    <% if (data.type === 'trash') { %>
+    <li id="t-delete">删除</li>
+    <% }else { %>
+    <li id="t-delete">移到回收站</li>
+    <% } %>
+</ul>
+<% } %>
+<%
+var data_content = 'no content';
+if (data.raw_content) {
+    data_content = data.raw_content.trim();
+} else if (typeof data == 'string') {
+    data_content = data.trim()
+}
+%>
+<% if (data.file_name) { %>
+<h3><%= data.file_name %></h3>
+<hr>
+<% } %>
+<div id="content-detail"><%- data_content %></div>
