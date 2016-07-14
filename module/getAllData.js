@@ -83,7 +83,7 @@ function getPages(sourcePath) {
     }
 
     itemNames.forEach(function (item) {
-        if (item.search(/^_/) !== -1) return;
+        if (!fs.lstatSync(path.join(sourcePath, item)).isDirectory() || item.search(/^_/) !== -1) return;
 
         var filePath = path.join(sourcePath, item, 'index.md');
 
@@ -141,7 +141,7 @@ function getPostFileContent(dirPath, fileName) {
         front_matter = front_matter[1];
 
     front_matter.split(/\n/).forEach(function (item) {
-        item = item.trim();
+
         if (!item) return;
         var attr = item.match(/^.*?(?=:)/)[0],
             value = item.replace(attr + ':', '').trim();
@@ -149,6 +149,7 @@ function getPostFileContent(dirPath, fileName) {
         file[attr] = value;
     });
 
+    // todo 如果没有时间，则设置文件创建时间
     file.date_unix = Date.parse(file.date);
 
     return file;

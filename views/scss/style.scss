@@ -1,5 +1,10 @@
 @charset "utf-8";
 
+*:focus,
+*:active {
+  outline: none !important;
+}
+
 //todo add autoprefixer
 pre {
   white-space: pre-line;
@@ -23,6 +28,20 @@ footer {
 
 .no-scroll {
   overflow: hidden;
+}
+
+.form-control {
+  border-radius: 0;
+  box-shadow: none;
+  border-color: #eee;
+  padding-left: 8px;
+  padding-right: 8px;
+
+  &:focus,
+  &:active {
+    border-color: #eee;
+    box-shadow: none;
+  }
 }
 
 #list-nav {
@@ -153,6 +172,27 @@ footer {
     }
   }
 
+  &.processing {
+    &::before,
+    #content-detail-body {
+      -webkit-filter: blur(4px);
+      filter: blur(4px);
+    }
+
+    &::after {
+      content: 'Sending content...';
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      line-height: 100vh;
+    }
+  }
+
   &[data-type]::before {
     content: "";
     position: absolute;
@@ -179,6 +219,10 @@ footer {
   &[data-type="trash"]::before {
     content: "回收站";
   }
+
+  &[data-type="new"]::before {
+    content: "新增";
+  }
 }
 
 #content-detail {
@@ -198,10 +242,6 @@ footer {
     border: 1px solid #eee;
     resize: vertical;
     line-height: 1.4;
-
-    &:focus {
-      outline: none;
-    }
   }
 }
 
@@ -272,6 +312,7 @@ footer {
   position: absolute;
   right: 10px;
   top: 5px;
+  z-index: 20;
   padding: 10px;
   line-height: 1;
   font-size: 20px;
@@ -288,6 +329,7 @@ footer {
   padding-bottom: 10px;
   transition: all .4s;
   transform: translate(-50%, -100%);
+  word-break: break-all;
 
   &.show {
     transform: translate(-50%, 0);

@@ -1,0 +1,37 @@
+<label for="new-filename">文件名/页面路径</label>
+<input type="text" name="filename" id="new-filename" class="form-control" placeholder="只允许字母、数字和英文符号：下划线(_)、连字符(-)">
+<br>
+
+<label>类型</label>
+<br>
+<label class="radio-inline">
+    <input type="radio" name="new-type" id="new-type-posts" value="posts" checked>
+    文章
+</label>
+<label class="radio-inline">
+    <input type="radio" name="new-type" id="new-type-pages" value="pages">
+    页面
+</label>
+
+<label class="radio-inline">
+    <input type="radio" name="new-type" id="new-type-drafts" value="drafts">
+    草稿
+</label>
+<br><br>
+
+
+<%
+var time = new Date();
+time = time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate() + ' ' + time.getHours() + ':' + time.getMinutes() + ':' + time.getSeconds();
+%>
+
+<label for="content-editor">内容</label>
+<textarea name="content" id="content-editor">title: new post
+date: <%= time %>
+    ---
+new content here</textarea>
+<br>
+
+<div id="new-publish-buttons" class="text-center">
+    <button id="t-publish-new" class="btn btn-default">发布</button>
+</div>

@@ -1,4 +1,3 @@
-// todo 消息通知系统
 const AJAX_TIMEOUT = 1000;
 
 // 事件委托
@@ -20,7 +19,6 @@ $listNavLi.click(function () {
 });
 
 $('.f-item').click(function () {
-    // todo add filename
     var $this = $(this),
         type = $this.attr('data-type'),
         index = $this.attr('data-index');
@@ -39,7 +37,7 @@ $('.f-item').click(function () {
             showContentDetail($.extend(data, {type: type, index: index}))
         },
         error: function (err) {
-            console.log('error, err=%O', err.responseJSON);
+            console.log('error, err=%O', err.responseJSON.msg);
         }
     });
 });
@@ -69,7 +67,7 @@ $('.view-config').click(function () {
 });
 
 $('#close-detail').click(function () {
-    $('#content-detail-inner').removeAttr('data-type');
+    $('#content-detail-inner').removeAttr('data-type class');
     $('#content-detail-wrap').removeClass('show');
     $('html, body').removeClass('no-scroll');
     setTimeout(function () {
@@ -91,6 +89,7 @@ $('#alert').click(function () {
 // ------- detail actions ---------
 $('#content-detail-body').multiOn({
     click: {
+        // 编辑、取消、保存
         '#t-edit': function () {
             var $this = $(this),
                 $tools = $this.parent().children('li');
@@ -174,17 +173,67 @@ $('#content-detail-body').multiOn({
                     bsAlert('danger', '错误：' + err.responseJSON);
                 }
             });
+        },
+
+        // 发布新文章/页面
+        '#t-publish-new': function () {
+            var $content_inner = $('#content-detail-inner'),
+                $publishBtn = $('#t-publish-new'),
+                file_name = $('#new-filename').val().trim(),
+                type = $('[name="new-type"]:checked').val().trim(),
+                content = $('#content-editor').val();
+
+            $content_inner.addClass('processing');
+            $publishBtn.attr('disabled', 'disabled');
+
+            if (!file_name || !isFilePathNameValid(file_name)) {
+                bsAlert('danger', '文件名/页面路径输入不正确');
+                $publishBtn.removeAttr('disabled');
+                $content_inner.removeClass('processing');
+                return false;
+            }
+
+            $.ajax({
+                url: '/write-markdown-file',
+                method: 'post',
+                timeout: AJAX_TIMEOUT,
+                data: {
+                    'type': type,
+                    'file_name': file_name,
+                    'content': content
+                },
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    if (data.status && data.status == 'success') {
+                        $('#close-detail').trigger('click');
+                        bsAlert('success', '发布成功！');
+                    }
+                    else {
+                        bsAlert('warning', '发现未知问题！');
+                    }
+                },
+                error: function (err) {
+                    bsAlert('danger', '错误：' + err.responseJSON.msg);
+                    $content_inner.removeClass('processing');
+                    $publishBtn.removeAttr('disabled');
+                }
+            });
         }
     }
 });
 
+$('#add-new').click(function () {
+    showContentDetail({type: "new", tpl: require('../ejs/tpl/new-post.ejs')});
+});
+
 function showContentDetail(data) {
+    var tpl = data.tpl || require('../ejs/tpl/file-content.ejs');
     $('#content-detail-inner').attr('data-type', data.type);
-    $('#content-detail-body').empty().html(require('../ejs/tpl/file-content.ejs')({data: data}));
+    $('#content-detail-body').empty().html(tpl({data: data}));
     $('#content-detail-wrap').addClass('show');
     $('html, body').addClass('no-scroll');
 }
-
 
 var alertTime;
 //default types: ['success', 'info', 'warning', 'danger']
@@ -204,7 +253,7 @@ function bsAlert(type, html) {
     }
 
     function action() {
-        $alert.attr('class', $alert.attr('class').replace(/alert-\w* ?/g, ''));
+        $alert.removeClass('alert-success alert-info alert-danger alert-warning');
         $alert.addClass('alert-' + type + ' show').html(html);
     }
 
@@ -212,4 +261,8 @@ function bsAlert(type, html) {
     alertTime = setTimeout(function () {
         $alert.removeClass('show');
     }, 3000);
+}
+
+function isFilePathNameValid(str) {
+    return str.replace(/[a-zA-Z0-9]|_|-/g, '').length === 0;
 }

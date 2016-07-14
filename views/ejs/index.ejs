@@ -49,7 +49,9 @@
                         <h3 class="panel-title">写作</h3>
                     </div>
                     <div class="panel-body">
-                        <button type="button" id="add-new" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> 写文章</button>
+                        <button type="button" id="add-new" class="btn btn-default"><span
+                                    class="glyphicon glyphicon-pencil"></span> 写文章
+                        </button>
                     </div>
                 </div>
 
@@ -96,13 +98,25 @@
                 <% var contentType = ['posts', 'pages', 'drafts', 'trash']; %>
                 <% for (var i = 0; i < contentType.length; i++) { %>
                 <div id="<%= contentType[i] %>-list" class="row" data-index="<%= i + 1 %>">
+                    <% if (data[contentType[i]].length > 0){ %>
+
                     <% data[contentType[i]].forEach(function(item, index) { %>
                     <div class="col-sm-6 col-lg-4">
                         <div class="f-item" title="<%= item.title %>"
                              data-type="<%= contentType[i] %>"
                              data-index="<%= index %>">
+                            <% if (contentType[i] === 'pages'){ %>
+
+                            <% if (item.page_url){ %>
+                            <h4><%= item.page_url %></h4>
+                            <% } %>
+
+                            <% } else { %>
+
                             <% if (item.title){ %>
                             <h4><%= item.title %></h4>
+                            <% } %>
+
                             <% } %>
 
                             <% if (item.date) { %>
@@ -131,6 +145,14 @@
                         </div>
                     </div>
                     <% }); %>
+
+                    <% } else { %>
+
+                    <div class="col-xs-12">
+                        <p>没有任何内容！</p>
+                    </div>
+
+                    <% } %>
                 </div>
                 <% } %>
             </div>
