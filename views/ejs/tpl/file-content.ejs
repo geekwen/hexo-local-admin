@@ -9,9 +9,9 @@
     <li id="t-publish-post">发布到文章</li>
     <li id="t-publish-page">发布到页面</li>
     <% } else if (data.type == 'trash') { %>
-    <li id="t-restore-post">还原到文章</li>
-    <li id="t-restore-page">还原到页面</li>
-    <li id="t-restore-draft">还原到草稿</li>
+    <li id="t-publish-post">还原到文章</li>
+    <li id="t-publish-page">还原到页面</li>
+    <li id="t-unpublish">还原到草稿</li>
     <% } %>
 
     <% if (data.type === 'trash') { %>
@@ -30,10 +30,11 @@ if (data.raw_content) {
 }
 %>
 <% if (data.page_url) { %>
-<h3><%= data.page_url %></h3>
+<h3>/<%= data.page_url %></h3>
 <hr>
 <% } else if (data.file_name) { %>
 <!-- todo 允许修改文件名? -->
+<!-- todo 增加文件的完整路径？方便定位文件具体位置 -->
 <h3><%= data.file_name %></h3>
 <hr>
 <% } %>

@@ -22,5 +22,11 @@
     "method": "post",
     "module": "index",
     "handler": "writeMarkdownFile"
+  },
+  {
+    "path": "/move-markdown-file",
+    "method": "post",
+    "module": "index",
+    "handler": "moveMarkdownFile"
   }
 ]

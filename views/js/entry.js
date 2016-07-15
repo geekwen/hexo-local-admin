@@ -219,6 +219,21 @@ $('#content-detail-body').multiOn({
                     $publishBtn.removeAttr('disabled');
                 }
             });
+        },
+
+        // ---- 文件移动相关 ----
+        // 移到草稿
+        '#t-unpublish': function () {
+            moveFileTo('drafts');
+        },
+        '#t-delete': function () {
+            moveFileTo('trash');
+        },
+        '#t-publish-post': function () {
+            moveFileTo('posts');
+        },
+        '#t-publish-page': function () {
+            moveFileTo('pages');
         }
     }
 });
@@ -233,6 +248,43 @@ function showContentDetail(data) {
     $('#content-detail-body').empty().html(tpl({data: data}));
     $('#content-detail-wrap').addClass('show');
     $('html, body').addClass('no-scroll');
+}
+
+function moveFileTo(target_type) {
+    var $tool_wrap = $('#content-tool'),
+        type = $tool_wrap.attr('data-type'),
+        index = $tool_wrap.attr('data-index');
+
+    if (!type || !index) {
+        console.error('type or index error');
+        return;
+    }
+
+    $.ajax({
+        url: '/move-markdown-file',
+        method: 'post',
+        timeout: AJAX_TIMEOUT,
+        data: {
+            'type': type,
+            'index': index,
+            'target_type': target_type
+        },
+        dataType: 'json',
+        cache: false,
+        success: function (data) {
+            if (data.status && data.status == 'success') {
+                $('#close-detail').trigger('click');
+                bsAlert('success', '移动成功！');
+            }
+            // else {
+            //     bsAlert('warning', '发现未知问题！');
+            // }
+            console.log('success:%O', data);
+        },
+        error: function (err) {
+            bsAlert('danger', '错误：' + err.responseJSON.msg);
+        }
+    });
 }
 
 var alertTime;

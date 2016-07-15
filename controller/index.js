@@ -116,6 +116,144 @@ exports.writeMarkdownFile = function (req, res) {
     }
 };
 
+exports.moveMarkdownFile = function (req, res) {
+    deleteDBCache();
+
+    var body = req.body,
+        type = body.type,
+        index = body.index,
+        target_type = body.target_type.replace(/s$/, ''),
+        DB = require('../__siteDB.json'),
+        file = DB[type][index];
+
+    console.log(body);
+
+    if (!file) {
+        res.status(500).send({"status": "error", "msg": "DB中没有找到该文章！"});
+        return;
+    }
+
+    var file_name, oldPath, newPath;
+
+    switch (type) {
+        case 'pages':
+            file_name = file.page_url + '.md';
+            oldPath = path.join(HEXO_PATH.sourcePath, file.page_url, 'index.md');
+            newPath = path.join(HEXO_PATH[target_type + 'Path'], file_name);
+
+            fs.access(
+                newPath,
+                fs.F_OK,
+                function (err) {
+                    if (!err) {
+                        res.status(500).send({"status": "error", "msg": target_type + "中存在同名文件！"});
+                        return;
+                    }
+
+                    moveFile(
+                        oldPath,
+                        newPath,
+
+                        // 移动完成后，需要删除原来的空文件夹
+                        function () {
+                            var pathToRm = path.join(HEXO_PATH.sourcePath, file.page_url);
+                            fs.rmdir(
+                                pathToRm,
+                                function (err) {
+                                    if (err) throw 'delete dir:' + pathToRm + ' failed';
+                                }
+                            );
+                        }
+                    );
+                }
+            );
+            break;
+        case 'posts':
+        case 'drafts':
+        case 'trash':
+            file_name = file.file_name;
+            oldPath = path.join(HEXO_PATH[type.replace(/s$/, '') + 'Path'], file_name);
+
+            if (type === 'trash' && target_type === 'trash') {
+                fs.unlink(
+                    oldPath,
+                    function (err) {
+                        if (err) {
+                            res.status(500).send({"status": "error", "msg": "删除文件失败！"})
+                        }
+
+                        getAllData.updateDBFile();
+                        res.json({"status": "success"});
+                    }
+                )
+            }
+            else {
+                if (target_type === 'page') {
+                    newPath = path.join(HEXO_PATH.sourcePath, file_name.replace(/\.md$/, ''));
+
+                    fs.access(
+                        newPath,
+                        fs.F_OK,
+                        function (err) {
+                            if (!err) {
+                                res.status(500).send({"status": "error", "msg": target_type + "中已有相同的路径！"});
+                                return;
+                            }
+
+                            fs.mkdir(
+                                newPath,
+                                function (err) {
+                                    if (err) {
+                                        throw err;
+                                    }
+
+                                    moveFile(oldPath, path.join(newPath, 'index.md'));
+                                }
+                            )
+                        }
+                    );
+                }
+                else {
+                    newPath = path.join(HEXO_PATH[target_type + 'Path'], file_name);
+
+                    fs.access(
+                        newPath,
+                        fs.F_OK,
+                        function (err) {
+                            if (!err) {
+                                res.status(500).send({"status": "error", "msg": target_type + "中存在同名文件！"});
+                                return;
+                            }
+
+                            moveFile(oldPath, newPath);
+                        }
+                    );
+                }
+            }
+            break;
+        default:
+            res.status(500).send({"status": "error", "msg": "不支持改操作！"})
+    }
+
+    function moveFile(oldPath, newPath, fn) {
+        fs.rename(
+            oldPath,
+            newPath,
+            function (err) {
+                if (err) {
+                    res.status(500).send({"status": "error", "msg": "移动文件失败！"});
+                    throw err;
+                }
+
+                if (fn && typeof fn === 'function') fn();
+
+                getAllData.updateDBFile();
+                res.json({"status": "success"});
+            }
+        );
+    }
+};
+
 function deleteDBCache() {
     delete require.cache[path.join(HEXO_PATH.adminPath, '__siteDB.json')];
 }

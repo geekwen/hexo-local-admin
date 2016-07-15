@@ -109,6 +109,10 @@ footer {
     transform: translate(0, -50%);
     transition: all $item-transition-time;
   }
+
+  &[data-type="pages"] h4::before {
+    content: "/";
+  }
 }
 
 #content-detail-wrap {
