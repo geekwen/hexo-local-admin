@@ -124,13 +124,16 @@ function getFile(filePath) {
  * */
 function getPostFileContent(dirPath, fileName) {
     if (fileName.search(/\.md$/) === -1) return null;
-    var file = {file_name: fileName};
+    var file = {
+        file_name: fileName,
+        file_path: path.join(dirPath, fileName)
+    };
 
     try {
-        file.raw_content = fs.readFileSync(path.join(dirPath, fileName), 'utf-8');
+        file.raw_content = fs.readFileSync(file.file_path, 'utf-8');
     }
     catch (e) {
-        console.log('cant read file:' + path.join(dirPath, fileName));
+        console.log('cant read file:' + file.file_path);
     }
 
     var front_matter = file.raw_content.split('---');
@@ -141,7 +144,6 @@ function getPostFileContent(dirPath, fileName) {
         front_matter = front_matter[1];
 
     front_matter.split(/\n/).forEach(function (item) {
-
         if (!item) return;
         var attr = item.match(/^.*?(?=:)/)[0],
             value = item.replace(attr + ':', '').trim();

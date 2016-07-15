@@ -83,16 +83,16 @@ footer {
   h4 {
     max-height: 50px;
     overflow: hidden;
-    margin-top: 0;
     margin-bottom: 8px;
     line-height: 1.4;
   }
 
   time,
-  .tags {
+  span,
+  small {
     color: #bbb;
     font-size: 12px;
-    vertical-align: middle;
+    vertical-align: text-top;
   }
 
   .tags {

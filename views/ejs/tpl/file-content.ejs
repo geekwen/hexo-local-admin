@@ -36,6 +36,11 @@ if (data.raw_content) {
 <!-- todo 允许修改文件名? -->
 <!-- todo 增加文件的完整路径？方便定位文件具体位置 -->
 <h3><%= data.file_name %></h3>
+
+<% if (data.file_path) { %>
+<span class="text-muted"><%= data.file_path %></span>
+<% } %>
+
 <hr>
 <% } %>
 

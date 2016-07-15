@@ -105,24 +105,28 @@
                         <div class="f-item" title="<%= item.title %>"
                              data-type="<%= contentType[i] %>"
                              data-index="<%= index %>">
-                            <% if (contentType[i] === 'pages'){ %>
 
-                            <% if (item.page_url){ %>
-                            <h4><%= item.page_url%></h4>
+                            <% if (item.file_name) { %>
+                            <div>
+                                <span class="glyphicon glyphicon-book"></span>
+                                <span><%= item.file_name %></span>
+                            </div>
                             <% } %>
 
+                            <% if (contentType[i] === 'pages'){ %>
+                            <% if (item.page_url){ %>
+                            <h4><%= item.page_url %></h4>
+                            <% } %>
                             <% } else { %>
-
                             <% if (item.title){ %>
                             <h4><%= item.title %></h4>
                             <% } %>
-
                             <% } %>
 
                             <% if (item.date) { %>
                             <time>
                                 <span class="glyphicon glyphicon-time"></span>
-                                <small><%= item.date %></small>
+                                <%= item.date %>
                             </time>
                             <% } %>
 
@@ -140,7 +144,7 @@
                             <% } %>
 
                             <!--<button class="delete btn btn-danger btn-xs" type="button">-->
-                                <!--<span class="glyphicon glyphicon-trash"></span>-->
+                            <!--<span class="glyphicon glyphicon-trash"></span>-->
                             <!--</button>-->
                         </div>
                     </div>
