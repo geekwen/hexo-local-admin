@@ -29,3 +29,7 @@ config.theme = "your_theme";
 4. open your browser and visit `localhost:4001`
 
 5. done!
+
+## License
+
+MIT
