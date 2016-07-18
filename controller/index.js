@@ -4,7 +4,6 @@ var path = require('path'),
     fs = require('fs'),
     getAllData = require('../module/getAllData');
 
-
 exports.entry = function (req, res) {
     deleteDBCache();
     res.render('index.ejs', {data: require('../__siteDB.json')});
@@ -30,14 +29,14 @@ exports.getConfig = function (req, res) {
     var query = req.query,
         DB = require('../__siteDB.json');
 
-    if (query.type.search(/site|theme/) === -1) {
-        res.status(500).send({"msg": "类型不正确！", "param": query});
-    }
-    else if (query.type == 'site') {
+    if (query.type == 'site') {
         res.json(DB.siteConfig);
     }
     else if (query.type = 'theme') {
         res.json(DB.themeConfig);
+    }
+    else {
+        res.status(500).send({"msg": "类型不正确！", "param": query});
     }
 };
 
@@ -97,14 +96,15 @@ exports.writeMarkdownFile = function (req, res) {
                     }
                 });
             }
+
+            else {
+                res.status(500).send({status: 'error', msg: '文章类型不正确！'});
+            }
         }
 
         function writeFile(filePath) {
             fs.writeFile(filePath, file_content, 'utf-8', function (err) {
-                if (err) {
-                    res.status(500).send({status: 'error', msg: 'file write err!'});
-                    throw err;
-                }
+                if (err) res.status(500).send({status: 'error', msg: 'file write err!'});
 
                 getAllData.updateDBFile();
                 res.json({status: 'success'});
@@ -118,19 +118,18 @@ exports.writeMarkdownFile = function (req, res) {
 
 exports.moveMarkdownFile = function (req, res) {
     deleteDBCache();
-
     var body = req.body,
         type = body.type,
         index = body.index,
         target_type = body.target_type.replace(/s$/, ''),
-        DB = require('../__siteDB.json'),
-        file = DB[type][index];
+        DB = require('../__siteDB.json');
 
-    console.log(body);
-
-    if (!file) {
+    try {
+        var file = DB[type][index];
+    }
+    catch (e) {
         res.status(500).send({"status": "error", "msg": "DB中没有找到该文章！"});
-        return;
+        throw e;
     }
 
     var file_name, oldPath, newPath;
@@ -145,26 +144,25 @@ exports.moveMarkdownFile = function (req, res) {
                 newPath,
                 fs.F_OK,
                 function (err) {
-                    if (!err) {
-                        res.status(500).send({"status": "error", "msg": target_type + "中存在同名文件！"});
-                        return;
+                    if (err) {
+                        moveFile(
+                            oldPath,
+                            newPath,
+
+                            // 移动完成后，需要删除原来的空文件夹
+                            function () {
+                                fs.rmdir(
+                                    path.join(HEXO_PATH.sourcePath, file.page_url),
+                                    function (err) {
+                                        if (err) throw err;
+                                    }
+                                );
+                            }
+                        );
                     }
-
-                    moveFile(
-                        oldPath,
-                        newPath,
-
-                        // 移动完成后，需要删除原来的空文件夹
-                        function () {
-                            var pathToRm = path.join(HEXO_PATH.sourcePath, file.page_url);
-                            fs.rmdir(
-                                pathToRm,
-                                function (err) {
-                                    if (err) throw 'delete dir:' + pathToRm + ' failed';
-                                }
-                            );
-                        }
-                    );
+                    else {
+                        res.status(500).send({"status": "error", "msg": target_type + "中存在同名文件！"});
+                    }
                 }
             );
             break;
@@ -179,11 +177,12 @@ exports.moveMarkdownFile = function (req, res) {
                     oldPath,
                     function (err) {
                         if (err) {
-                            res.status(500).send({"status": "error", "msg": "删除文件失败！"})
+                            res.status(500).send({"status": "error", "msg": "删除文件失败！"});
+                            throw err;
                         }
 
                         getAllData.updateDBFile();
-                        res.json({"status": "success"});
+                        res.json({"status": "success", "msg": "删除成功！"});
                     }
                 )
             }
@@ -195,21 +194,18 @@ exports.moveMarkdownFile = function (req, res) {
                         newPath,
                         fs.F_OK,
                         function (err) {
-                            if (!err) {
-                                res.status(500).send({"status": "error", "msg": target_type + "中已有相同的路径！"});
-                                return;
-                            }
-
-                            fs.mkdir(
-                                newPath,
-                                function (err) {
-                                    if (err) {
-                                        throw err;
+                            if (err) {
+                                fs.mkdir(
+                                    newPath,
+                                    function (err) {
+                                        if (err) throw err;
+                                        moveFile(oldPath, path.join(newPath, 'index.md'));
                                     }
-
-                                    moveFile(oldPath, path.join(newPath, 'index.md'));
-                                }
-                            )
+                                )
+                            }
+                            else {
+                                res.status(500).send({"status": "error", "msg": target_type + "中已有相同的路径！"});
+                            }
                         }
                     );
                 }
@@ -220,12 +216,12 @@ exports.moveMarkdownFile = function (req, res) {
                         newPath,
                         fs.F_OK,
                         function (err) {
-                            if (!err) {
-                                res.status(500).send({"status": "error", "msg": target_type + "中存在同名文件！"});
-                                return;
+                            if (err) {
+                                moveFile(oldPath, newPath);
                             }
-
-                            moveFile(oldPath, newPath);
+                            else {
+                                res.status(500).send({"status": "error", "msg": target_type + "中存在同名文件！"});
+                            }
                         }
                     );
                 }

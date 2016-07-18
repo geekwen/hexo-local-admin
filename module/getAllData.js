@@ -9,35 +9,56 @@ var fs = require('fs'),
     path = require('path'),
     extend = require('extend');
 
-exports.updateDBFile = writeDB;
+exports.updateDBFile = function () {
+    var flagIndex = 0;
 
-/**
- * 获取站点数据
- * @returns {object} 站点数据
- * */
-function getAllData() {
-    var siteData = {
-        hexoPath: HEXO_PATH.rootPath,
-        theme: HEXO_PATH.theme,
-        posts: getDirMdFiles(HEXO_PATH.postPath),
-        drafts: getDirMdFiles(HEXO_PATH.draftPath),
-        trash: getDirMdFiles(HEXO_PATH.trashPath),
-        pages: getPages(HEXO_PATH.sourcePath),
-        themeConfig: getFile(HEXO_PATH.themeConfig),
-        siteConfig: getFile(HEXO_PATH.siteConfig)
-    };
-
-    siteData.tags = getTagData(siteData.posts);
-    return siteData;
-}
-
-/** 读取站点数据并写入db文件 */
-function writeDB() {
-    fs.writeFile(path.join(HEXO_PATH.adminPath, '__siteDB.json'), JSON.stringify(getAllData()), function (err) {
-        if (err) throw err;
-        console.log('Data file update!');
+    // 初始化 _posts, _drafts, _trash文件夹
+    ['post', 'draft', 'trash'].forEach(function (item) {
+        fs.access(
+            HEXO_PATH[item + 'Path'],
+            fs.F_OK,
+            function (err) {
+                if (err) {
+                    fs.mkdir(
+                        HEXO_PATH[item + 'Path'],
+                        function (e) {
+                            if (e) throw e;
+                            flagIndex++;
+                            if (flagIndex === 3) action();
+                        }
+                    );
+                    return;
+                }
+                flagIndex++;
+                if (flagIndex === 3) action();
+            }
+        );
     });
-}
+
+    function action() {
+        var siteData = {
+            hexoPath: HEXO_PATH.rootPath,
+            theme: HEXO_PATH.theme,
+            posts: getDirMdFiles(HEXO_PATH.postPath),
+            drafts: getDirMdFiles(HEXO_PATH.draftPath),
+            trash: getDirMdFiles(HEXO_PATH.trashPath),
+            pages: getPages(),
+            themeConfig: getFile(HEXO_PATH.themeConfig),
+            siteConfig: getFile(HEXO_PATH.siteConfig)
+        };
+
+        siteData.tags = getTagData(siteData.posts);
+
+        fs.writeFile(
+            path.join(HEXO_PATH.adminPath, '__siteDB.json'),
+            JSON.stringify(siteData),
+            function (err) {
+                if (err) throw err;
+                console.log('__siteDB.json update!');
+            }
+        );
+    }
+};
 
 /**
  * 读取某个目录下的markdown文件
@@ -46,21 +67,18 @@ function writeDB() {
  * */
 function getDirMdFiles(dirPath) {
     console.log('getting content of:' + dirPath);
-    var data = [],
-        fileNames;
+    var data = [];
 
     try {
-        fileNames = fs.readdirSync(dirPath);
+        fs.readdirSync(dirPath).forEach(function (file_name) {
+            // 过滤掉非md结尾的文件
+            if (file_name.search(/\.md$/) === -1) return;
+            data.push(getPostFileContent(dirPath, file_name));
+        });
     }
-    catch (e) {
-        throw 'can\'t read dir:' + dirPath;
+    catch (err) {
+        throw err;
     }
-
-    fileNames.forEach(function (filename) {
-        // 过滤掉非md结尾的文件
-        if (filename.search(/\.md$/) === -1) return;
-        data.push(getPostFileContent(dirPath, filename));
-    });
 
     // 最新的排最前面
     return data.sort(sortListFromNewToOld);
@@ -68,30 +86,28 @@ function getDirMdFiles(dirPath) {
 
 /**
  * 获取所有的页面，注意：仅支持source/page-path/index.md这种单一的方式
- * @param {string} sourcePath hexo source文件夹的路径
  * @returns {object[]} array of page content
  * */
-function getPages(sourcePath) {
+function getPages() {
     var data = [],
-        itemNames = null;
+        sourcePath = HEXO_PATH.sourcePath,
+        itemNames;
 
     try {
         itemNames = fs.readdirSync(sourcePath);
     }
-    catch (e) {
-        throw 'cant read dir:' + sourcePath;
+    catch (err) {
+        throw err;
     }
 
-    itemNames.forEach(function (item) {
-        if (!fs.lstatSync(path.join(sourcePath, item)).isDirectory() || item.search(/^_/) !== -1) return;
-
-        var filePath = path.join(sourcePath, item, 'index.md');
-
+    itemNames.forEach(function (itemName) {
         try {
-            fs.accessSync(filePath, fs.F_OK);
-            data.push(extend(getPostFileContent(path.join(sourcePath, item), 'index.md'), {page_url: item}));
-        } catch (e) {
-            console.log('cant read file:' + filePath);
+            if (fs.lstatSync(path.join(sourcePath, itemName)).isDirectory() && itemName.search(/^_/) === -1) {
+                data.push(extend(getPostFileContent(path.join(sourcePath, itemName), 'index.md'), {page_url: itemName}));
+            }
+        }
+        catch (e) {
+            console.error(e);
         }
     });
 
@@ -110,7 +126,7 @@ function getFile(filePath) {
         fileContent = fs.readFileSync(filePath, 'utf-8');
     }
     catch (e) {
-        throw 'cant read siteConfig:' + filePath;
+        throw e;
     }
 
     return fileContent;
@@ -133,7 +149,7 @@ function getPostFileContent(dirPath, fileName) {
         file.raw_content = fs.readFileSync(file.file_path, 'utf-8');
     }
     catch (e) {
-        console.log('cant read file:' + file.file_path);
+        throw e;
     }
 
     var front_matter = file.raw_content.split('---');
@@ -143,6 +159,7 @@ function getPostFileContent(dirPath, fileName) {
         front_matter = front_matter[0] :
         front_matter = front_matter[1];
 
+    // todo 优化front matter的解析
     front_matter.split(/\n/).forEach(function (item) {
         if (!item) return;
         var attr = item.match(/^.*?(?=:)/)[0],
@@ -164,6 +181,7 @@ function getPostFileContent(dirPath, fileName) {
  * */
 function getTagData(fileArr) {
     var tagData = {length: 0};
+
     fileArr.forEach(function (item) {
         if (!item.hasOwnProperty('tags') || !item.tags) return;
         Array.isArray(item.tags) ?
