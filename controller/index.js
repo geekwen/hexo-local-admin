@@ -9,6 +9,11 @@ exports.entry = function (req, res) {
     res.render('index.ejs', {data: require('../__siteDB.json')});
 };
 
+exports.getAll = function (req, res) {
+    deleteDBCache();
+    res.json({status: "success", data: require('../__siteDB.json')});
+};
+
 exports.getMarkdownFile = function (req, res) {
     deleteDBCache();
     var query = req.query,

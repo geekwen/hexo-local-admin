@@ -31,16 +31,14 @@ if (data.raw_content) {
 %>
 <% if (data.page_url) { %>
 <h3>/<%= data.page_url %></h3>
-<hr>
-<% } else if (data.file_name) { %>
-<!-- todo 允许修改文件名? -->
-<h3><%= data.file_name %></h3>
+<% } else if (data.title) { %>
+<h3><%= data.title %></h3>
+<% } %>
 
 <% if (data.file_path) { %>
 <span class="text-muted"><%= data.file_path %></span>
 <% } %>
 
 <hr>
-<% } %>
 
 <div id="content-detail"><%= data_content %></div>

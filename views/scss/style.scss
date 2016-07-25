@@ -19,6 +19,17 @@ pre {
   }
 }
 
+header {
+  h1 a {
+    color: inherit;
+
+    &:hover {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+}
+
 footer {
   padding-top: 50px;
   padding-bottom: 10px;
@@ -47,13 +58,23 @@ footer {
 #list-nav {
   margin-bottom: 20px;
 
-  ~ [data-index] {
+  ~ [data-type] {
     display: none;
   }
 
-  @for $i from 1 through 4 {
-    &[data-select="#{$i}"] ~ [data-index="#{$i}"] {
-      display: block;
+  @each $type in posts, pages, drafts, trash {
+    &[data-select="#{$type}"] {
+      li[data-type="#{$type}"] a {
+        color: #555;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-bottom-color: transparent;
+        cursor: default;
+      }
+
+      ~ [data-type="#{$type}"] {
+        display: block;
+      }
     }
   }
 }

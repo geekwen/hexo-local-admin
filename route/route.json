@@ -6,6 +6,12 @@
     "handler": "entry"
   },
   {
+    "path": "/get-all",
+    "method": "get",
+    "module": "index",
+    "handler": "getAll"
+  },
+  {
     "path": "/get-markdown-file",
     "method": "get",
     "module": "index",

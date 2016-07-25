@@ -30,6 +30,10 @@ config.theme = "your_theme";
 
 5. done!
 
+## Tips
+
+1. Front matter format must follow: https://github.com/dworthen/js-yaml-front-matter
+
 ## License
 
 MIT

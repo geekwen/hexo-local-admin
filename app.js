@@ -9,7 +9,8 @@ var fs = require('fs'),
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views/ejs'));
 app.use(express.static('views/public'));
-app.use(body_parser());
+app.use(body_parser.urlencoded({extended: true}));
+app.use(body_parser.json());
 
 require('./route/route.json').forEach(function (route) {
     app[route.method](route.path, require(path.join(__dirname, 'controller', route.module))[route.handler])

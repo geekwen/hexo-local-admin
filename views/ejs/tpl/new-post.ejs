@@ -22,12 +22,16 @@
 
 <%
 var time = new Date();
-time = time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate() + ' ' + time.getHours() + ':' + time.getMinutes() + ':' + time.getSeconds();
+time = time.getFullYear() + '-' + (time.getMonth() + 1) + '-' + time.getDate() + ' ' +
+        (time.getHours().toString().length === 1 ? '0' + time.getHours() : time.getHours()) + ':' +
+        (time.getMinutes().toString().length === 1 ? '0' + time.getMinutes() : time.getMinutes()) + ':' +
+        (time.getSeconds().toString().length === 1 ? '0' + time.getSeconds() : time.getSeconds());
 %>
 
 <label for="content-editor">内容</label>
-<textarea name="content" id="content-editor">title: new post
-date: <%= time %>
+<textarea name="content" id="content-editor">---
+title: new post
+date: "<%= time %>"
 ---
 new content here</textarea>
 <br>

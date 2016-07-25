@@ -1,0 +1,82 @@
+<% if (typeof type === 'undefined') {
+    var type = 'posts';
+} %>
+<ul id="list-nav" class="nav nav-tabs" data-select="<%= type %>">
+    <li id="post-list" role="presentation" data-type="posts">
+        <a href="javascript:void(0)">已发布（<%= data.posts.length %>）</a>
+    </li>
+    <li id="page-list" role="presentation" data-type="pages">
+        <a href="javascript:void(0)">页面（<%= data.pages.length %>）</a>
+    </li>
+    <li id="draft-list" role="presentation" data-type="drafts">
+        <a href="javascript:void(0)">草稿（<%= data.drafts.length %>）</a>
+    </li>
+    <li id="trash-list" role="presentation" data-type="trash">
+        <a href="javascript:void(0)">回收站（<%= data.trash.length %>）</a>
+    </li>
+</ul>
+
+<% var contentType = ['posts', 'pages', 'drafts', 'trash']; %>
+<% for (var i = 0; i < contentType.length; i++) { %>
+<div id="<%= contentType[i] %>-list" class="row" data-type="<%= contentType[i] %>">
+    <% if (data[contentType[i]].length > 0){ %>
+
+    <% data[contentType[i]].forEach(function(item, index) { %>
+    <div class="col-sm-6 col-lg-4">
+        <div class="f-item" title="<%= item.title %>"
+             data-type="<%= contentType[i] %>"
+             data-index="<%= index %>">
+
+            <% if (item.file_name) { %>
+            <div>
+                <span class="glyphicon glyphicon-book"></span>
+                <span><%= item.file_name %></span>
+            </div>
+            <% } %>
+
+            <% if (contentType[i] === 'pages'){ %>
+            <% if (item.page_url){ %>
+            <h4><%= item.page_url %></h4>
+            <% } %>
+            <% } else { %>
+            <% if (item.title){ %>
+            <h4><%= item.title %></h4>
+            <% } %>
+            <% } %>
+
+            <% if (item.date) { %>
+            <time>
+                <span class="glyphicon glyphicon-time"></span>
+                <%= item.date %>
+            </time>
+            <% } %>
+
+            <% if (item.tags) { %>
+            <div class="tags">
+                <span class="glyphicon glyphicon-tag"></span>
+                <% if (Array.isArray(item.tags)) { %>
+                <% item.tags.forEach(function(tagName) { %>
+                <span>#<%= tagName %></span>
+                <% }); %>
+                <% } else { %>
+                <span>#<%= item.tags %></span>
+                <% } %>
+            </div>
+            <% } %>
+
+            <!--<button class="delete btn btn-danger btn-xs" type="button">-->
+            <!--<span class="glyphicon glyphicon-trash"></span>-->
+            <!--</button>-->
+        </div>
+    </div>
+    <% }); %>
+
+    <% } else { %>
+
+    <div class="col-xs-12">
+        <p>没有任何内容！</p>
+    </div>
+
+    <% } %>
+</div>
+<% } %>

@@ -7,6 +7,7 @@ const HEXO_PATH = require('../config');
 
 var fs = require('fs'),
     path = require('path'),
+    yamlFM = require('yaml-front-matter'),
     extend = require('extend');
 
 exports.updateDBFile = function () {
@@ -43,8 +44,16 @@ exports.updateDBFile = function () {
             drafts: getDirMdFiles(HEXO_PATH.draftPath),
             trash: getDirMdFiles(HEXO_PATH.trashPath),
             pages: getPages(),
-            themeConfig: getFile(HEXO_PATH.themeConfig),
-            siteConfig: getFile(HEXO_PATH.siteConfig)
+            themeConfig: {
+                title: 'Theme Config',
+                file_path: HEXO_PATH.themeConfig,
+                raw_content: getFile(HEXO_PATH.themeConfig)
+            },
+            siteConfig: {
+                title: 'Site Config',
+                file_path: HEXO_PATH.siteConfig,
+                raw_content: getFile(HEXO_PATH.siteConfig)
+            }
         };
 
         siteData.tags = getTagData(siteData.posts);
@@ -54,7 +63,9 @@ exports.updateDBFile = function () {
             JSON.stringify(siteData),
             function (err) {
                 if (err) throw err;
-                console.log('__siteDB.json update!');
+                var time = new Date();
+                time = time.getFullYear() + '/' + (time.getMonth() + 1) + '/' + time.getDate() + ' ' + time.getHours() + ':' + time.getMinutes() + ':' + time.getSeconds();
+                console.log('[' + time + '] __siteDB.json update!');
             }
         );
     }
@@ -66,7 +77,6 @@ exports.updateDBFile = function () {
  * @returns {object[]} array of file content
  * */
 function getDirMdFiles(dirPath) {
-    console.log('getting content of:' + dirPath);
     var data = [];
 
     try {
@@ -107,7 +117,7 @@ function getPages() {
             }
         }
         catch (e) {
-            console.error(e);
+            if (e.code !== 'ENOENT') console.error(e);
         }
     });
 
@@ -147,31 +157,15 @@ function getPostFileContent(dirPath, fileName) {
 
     try {
         file.raw_content = fs.readFileSync(file.file_path, 'utf-8');
+        extend(file, yamlFM.loadFront(file.raw_content));
+
+        // todo 如果没有时间，则设置文件创建时间
+        file.date_unix = Date.parse(file.date);
+        return file;
     }
     catch (e) {
         throw e;
     }
-
-    var front_matter = file.raw_content.split('---');
-
-    // 解析Front-matter信息，注意：Front-matter每一项内容需要在一行
-    front_matter[0] ?
-        front_matter = front_matter[0] :
-        front_matter = front_matter[1];
-
-    // todo 优化front matter的解析
-    front_matter.split(/\n/).forEach(function (item) {
-        if (!item) return;
-        var attr = item.match(/^.*?(?=:)/)[0],
-            value = item.replace(attr + ':', '').trim();
-        if (value.search(/^\[/) !== -1 && value.search(/]$/) !== -1) value = value.replace(/\[|]|\s/g, '').split(',');
-        file[attr] = value;
-    });
-
-    // todo 如果没有时间，则设置文件创建时间
-    file.date_unix = Date.parse(file.date);
-
-    return file;
 }
 
 /**

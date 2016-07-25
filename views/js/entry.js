@@ -9,39 +9,6 @@ $.fn.multiOn = function (obj) {
                     $(this).on(eName, selector, obj[eName][selector]);
 };
 
-var $listNav = $('#list-nav'),
-    $listNavLi = $listNav.children('li');
-
-$listNavLi.click(function () {
-    $listNavLi.removeClass('active');
-    $(this).addClass('active');
-    $listNav.attr('data-select', $(this).attr('data-index'));
-});
-
-$('.f-item').click(function () {
-    var $this = $(this),
-        type = $this.attr('data-type'),
-        index = $this.attr('data-index');
-
-    $.ajax({
-        url: '/get-markdown-file',
-        method: 'get',
-        timeout: AJAX_TIMEOUT,
-        data: {
-            type: type,
-            index: index
-        },
-        dataType: 'json',
-        cache: false,
-        success: function (data) {
-            showContentDetail($.extend(data, {type: type, index: index}))
-        },
-        error: function (err) {
-            console.log('error, err=%O', err.responseJSON.msg);
-        }
-    });
-});
-
 $('.view-config').click(function () {
     var type = $(this).attr('data-type');
 
@@ -49,8 +16,6 @@ $('.view-config').click(function () {
         console.warn('no such config type:' + type);
         return;
     }
-
-    $('#content-detail-head').html('<h3>' + type.toUpperCase() + ' CONFIG</h3><hr>');
 
     $.ajax({
         url: '/get-config',
@@ -84,6 +49,37 @@ $('body').mousedown(function (e) {
 
 $('#alert').click(function () {
     $(this).removeClass('show');
+});
+
+$('#main-container').multiOn({
+    click: {
+        '.f-item': function () {
+            var $this = $(this),
+                type = $this.attr('data-type'),
+                index = $this.attr('data-index');
+
+            $.ajax({
+                url: '/get-markdown-file',
+                method: 'get',
+                timeout: AJAX_TIMEOUT,
+                data: {
+                    type: type,
+                    index: index
+                },
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    showContentDetail($.extend(data, {type: type, index: index}))
+                },
+                error: function (err) {
+                    console.log('error, err=%O', err.responseJSON.msg);
+                }
+            });
+        },
+        '#list-nav li': function () {
+            $(this).parent().attr('data-select', $(this).attr('data-type'));
+        }
+    }
 });
 
 // ------- detail actions ---------
@@ -161,6 +157,7 @@ $('#content-detail-body').multiOn({
                             $('#t-cancel').remove();
                             $tools.children('li').removeAttr('class');
                             bsAlert('success', '保存成功！');
+                            refreshList(type);
                         }, 400);
                     }
                     else {
@@ -208,6 +205,7 @@ $('#content-detail-body').multiOn({
                     if (data.status && data.status == 'success') {
                         $('#close-detail').trigger('click');
                         bsAlert('success', '发布成功！');
+                        refreshList(type);
                     }
                     else {
                         bsAlert('warning', '发现未知问题！');
@@ -256,7 +254,7 @@ function moveFileTo(target_type) {
         index = $tool_wrap.attr('data-index');
 
     if (!type || !index) {
-        console.error('type or index error');
+        bsAlert('danger', '参数不正确！');
         return;
     }
 
@@ -274,12 +272,12 @@ function moveFileTo(target_type) {
         success: function (data) {
             if (data.status && data.status == 'success') {
                 $('#close-detail').trigger('click');
-                bsAlert('success', '移动成功！');
+                bsAlert('success', data.msg || '移动成功');
+                refreshList(target_type);
             }
-            // else {
-            //     bsAlert('warning', '发现未知问题！');
-            // }
-            console.log('success:%O', data);
+            else {
+                bsAlert('warning', 'moveFileTo 发现未知问题！');
+            }
         },
         error: function (err) {
             bsAlert('danger', '错误：' + err.responseJSON.msg);
@@ -287,10 +285,49 @@ function moveFileTo(target_type) {
     });
 }
 
-var alertTime;
-//default types: ['success', 'info', 'warning', 'danger']
 /**
- * @param {string} type
+ * @param {string} type one of ['posts', 'pages', 'drafts', 'trash']
+ * */
+function refreshList(type) {
+    type = type || 'posts';
+    $.ajax({
+        url: '/get-all',
+        method: 'get',
+        timeout: AJAX_TIMEOUT,
+        dataType: 'json',
+        cache: false,
+        success: function (data) {
+            if (data.status && data.status == 'success') {
+                data = data.data;
+
+                $('#list-nav').parent().html(require('../ejs/tpl/list.ejs')({data: data, type: type}));
+
+                var tagList = '',
+                    $tagList = $('#tag-list');
+
+                for (var tag in data.tags) {
+                    if (data.tags.hasOwnProperty(tag) && tag !== 'length') {
+                        tagList += '<li>' + tag + ' ( ' + data.tags[tag].length + ' )' + '</li>';
+                    }
+                }
+
+                $tagList.find('h3').text('共有 ' + data.tags.length + ' 个标签');
+                $tagList.find('ul').html(tagList);
+
+                return;
+            }
+
+            bsAlert('warning', 'refreshList 发现未知问题！');
+        },
+        error: function (err) {
+            bsAlert('danger', '错误：' + err.responseJSON);
+        }
+    });
+}
+
+var alertTime;
+/**
+ * @param {string} type  one of ['success', 'info', 'warning', 'danger']
  * @param {string} html
  * */
 function bsAlert(type, html) {

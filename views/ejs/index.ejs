@@ -21,7 +21,7 @@
 
 <header class="jumbotron">
     <div class="container">
-        <h1>Hexo Admin</h1>
+        <h1><a href="/">Hexo Admin</a></h1>
         <div class="row">
             <div class="col-sm-4">
                 <dl>
@@ -40,7 +40,7 @@
 </header>
 
 <% if (data) { %>
-<main>
+<main id="main-container">
     <div class="container">
         <div class="row">
             <div class="col-sm-3 col-sm-push-9">
@@ -49,8 +49,8 @@
                         <h3 class="panel-title">写作</h3>
                     </div>
                     <div class="panel-body">
-                        <button type="button" id="add-new" class="btn btn-default"><span
-                                    class="glyphicon glyphicon-pencil"></span> 写文章
+                        <button type="button" id="add-new" class="btn btn-default">
+                            <span class="glyphicon glyphicon-pencil"></span> 写文章
                         </button>
                     </div>
                 </div>
@@ -65,14 +65,14 @@
                     </div>
                 </div>
 
-                <div class="panel panel-default">
+                <div id="tag-list" class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title">共有 <%= data.tags.length %> 个标签</h3>
                     </div>
                     <div class="panel-body">
                         <ul class="list-inline list-action">
                             <% for (var key in data.tags){ if (data.tags.hasOwnProperty(key) && key !== 'length'){ %>
-                            <li><%= key %>（<%= data.tags[key].length %>）</li>
+                            <li><%= key %> ( <%= data.tags[key].length %> )</li>
                             <% }} %>
                         </ul>
                     </div>
@@ -80,85 +80,7 @@
             </div>
 
             <div class="col-sm-9 col-sm-pull-3">
-                <ul id="list-nav" class="nav nav-tabs" data-select="1">
-                    <li role="presentation" class="active" data-index="1">
-                        <a href="javascript:void(0)">已发布（<%= data.posts.length %>）</a>
-                    </li>
-                    <li role="presentation" data-index="2">
-                        <a href="javascript:void(0)">页面（<%= data.pages.length %>）</a>
-                    </li>
-                    <li role="presentation" data-index="3">
-                        <a href="javascript:void(0)">草稿（<%= data.drafts.length %>）</a>
-                    </li>
-                    <li role="presentation" data-index="4">
-                        <a href="javascript:void(0)">回收站（<%= data.trash.length %>）</a>
-                    </li>
-                </ul>
-
-                <% var contentType = ['posts', 'pages', 'drafts', 'trash']; %>
-                <% for (var i = 0; i < contentType.length; i++) { %>
-                <div id="<%= contentType[i] %>-list" class="row" data-index="<%= i + 1 %>">
-                    <% if (data[contentType[i]].length > 0){ %>
-
-                    <% data[contentType[i]].forEach(function(item, index) { %>
-                    <div class="col-sm-6 col-lg-4">
-                        <div class="f-item" title="<%= item.title %>"
-                             data-type="<%= contentType[i] %>"
-                             data-index="<%= index %>">
-
-                            <% if (item.file_name) { %>
-                            <div>
-                                <span class="glyphicon glyphicon-book"></span>
-                                <span><%= item.file_name %></span>
-                            </div>
-                            <% } %>
-
-                            <% if (contentType[i] === 'pages'){ %>
-                            <% if (item.page_url){ %>
-                            <h4><%= item.page_url %></h4>
-                            <% } %>
-                            <% } else { %>
-                            <% if (item.title){ %>
-                            <h4><%= item.title %></h4>
-                            <% } %>
-                            <% } %>
-
-                            <% if (item.date) { %>
-                            <time>
-                                <span class="glyphicon glyphicon-time"></span>
-                                <%= item.date %>
-                            </time>
-                            <% } %>
-
-                            <% if (item.tags) { %>
-                            <div class="tags">
-                                <span class="glyphicon glyphicon-tag"></span>
-                                <% if (Array.isArray(item.tags)) { %>
-                                <% item.tags.forEach(function(tagName) { %>
-                                <span>#<%= tagName %></span>
-                                <% }); %>
-                                <% } else { %>
-                                <span>#<%= item.tags %></span>
-                                <% } %>
-                            </div>
-                            <% } %>
-
-                            <!--<button class="delete btn btn-danger btn-xs" type="button">-->
-                            <!--<span class="glyphicon glyphicon-trash"></span>-->
-                            <!--</button>-->
-                        </div>
-                    </div>
-                    <% }); %>
-
-                    <% } else { %>
-
-                    <div class="col-xs-12">
-                        <p>没有任何内容！</p>
-                    </div>
-
-                    <% } %>
-                </div>
-                <% } %>
+                <% include tpl/list.ejs %>
             </div>
         </div>
     </div>
