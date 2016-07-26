@@ -41,6 +41,10 @@ footer {
   overflow: hidden;
 }
 
+.panel-body button {
+  margin: 3px 2px;
+}
+
 .form-control {
   border-radius: 0;
   box-shadow: none;
@@ -104,6 +108,7 @@ footer {
   h4 {
     max-height: 50px;
     overflow: hidden;
+    margin-top: 5px;
     margin-bottom: 8px;
     line-height: 1.4;
   }
@@ -230,23 +235,23 @@ footer {
   }
 
   &[data-type="posts"]::before {
-    content: "文章";
+    content: "Post";
   }
 
   &[data-type="pages"]::before {
-    content: "页面";
+    content: "Page";
   }
 
   &[data-type="drafts"]::before {
-    content: "草稿";
+    content: "Draft";
   }
 
   &[data-type="trash"]::before {
-    content: "回收站";
+    content: "Trash";
   }
 
   &[data-type="new"]::before {
-    content: "新增";
+    content: "New";
   }
 }
 
@@ -363,6 +368,32 @@ footer {
   @media (min-width: 768px) {
     max-width: 400px;
   }
+}
+
+#hexo-actions {
+  #visit-hexo,
+  #cli-hexo-stop {
+    display: none;
+  }
+
+  &.running {
+    #visit-hexo {
+      display: block;
+    }
+
+    #cli-hexo-stop {
+      display: inline-block;
+    }
+
+    #cli-hexo-server {
+      display: none;
+    }
+  }
+}
+
+#visit-hexo {
+  margin-bottom: 10px;
+  padding: 0 6px;
 }
 
 @keyframes spin {

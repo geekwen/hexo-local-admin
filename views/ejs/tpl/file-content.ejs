@@ -1,23 +1,23 @@
 <% if (data.type) { %>
 <ul id="content-tool" class="list-action list-unstyled"
     data-type="<%= data.type %>" data-index="<%= data.index %>">
-    <li id="t-edit">编辑</li>
+    <li id="t-edit">Edit</li>
 
     <% if (data.type == 'posts' || data.type == 'pages'){ %>
-    <li id="t-unpublish">移到草稿</li>
+    <li id="t-unpublish">Move to draft</li>
     <% } else if (data.type == 'drafts') { %>
-    <li id="t-publish-post">发布到文章</li>
-    <li id="t-publish-page">发布到页面</li>
+    <li id="t-publish-post">Publish to post</li>
+    <li id="t-publish-page">Publish to page</li>
     <% } else if (data.type == 'trash') { %>
-    <li id="t-publish-post">还原到文章</li>
-    <li id="t-publish-page">还原到页面</li>
-    <li id="t-unpublish">还原到草稿</li>
+    <li id="t-publish-post">Restore to post</li>
+    <li id="t-publish-page">Restore to page</li>
+    <li id="t-unpublish">Restore to draft</li>
     <% } %>
 
     <% if (data.type === 'trash') { %>
-    <li id="t-delete">删除</li>
+    <li id="t-delete">Delete</li>
     <% }else { %>
-    <li id="t-delete">移到回收站</li>
+    <li id="t-delete">Move to trash</li>
     <% } %>
 </ul>
 <% } %>

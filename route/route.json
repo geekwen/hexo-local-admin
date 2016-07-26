@@ -34,5 +34,23 @@
     "method": "post",
     "module": "index",
     "handler": "moveMarkdownFile"
+  },
+  {
+    "path": "/hexo-server",
+    "method": "get",
+    "module": "hexo",
+    "handler": "server"
+  },
+  {
+    "path": "/hexo-kill",
+    "method": "get",
+    "module": "hexo",
+    "handler": "kill"
+  },
+  {
+    "path": "/hexo-deploy",
+    "method": "get",
+    "module": "hexo",
+    "handler": "deploy"
   }
 ]

@@ -3,16 +3,16 @@
 } %>
 <ul id="list-nav" class="nav nav-tabs" data-select="<%= type %>">
     <li id="post-list" role="presentation" data-type="posts">
-        <a href="javascript:void(0)">已发布（<%= data.posts.length %>）</a>
+        <a href="javascript:void(0)">Posts ( <%= data.posts.length %> )</a>
     </li>
     <li id="page-list" role="presentation" data-type="pages">
-        <a href="javascript:void(0)">页面（<%= data.pages.length %>）</a>
+        <a href="javascript:void(0)">Pages ( <%= data.pages.length %> )</a>
     </li>
     <li id="draft-list" role="presentation" data-type="drafts">
-        <a href="javascript:void(0)">草稿（<%= data.drafts.length %>）</a>
+        <a href="javascript:void(0)">Drafts ( <%= data.drafts.length %> )</a>
     </li>
     <li id="trash-list" role="presentation" data-type="trash">
-        <a href="javascript:void(0)">回收站（<%= data.trash.length %>）</a>
+        <a href="javascript:void(0)">Trash ( <%= data.trash.length %> )</a>
     </li>
 </ul>
 
@@ -63,10 +63,6 @@
                 <% } %>
             </div>
             <% } %>
-
-            <!--<button class="delete btn btn-danger btn-xs" type="button">-->
-            <!--<span class="glyphicon glyphicon-trash"></span>-->
-            <!--</button>-->
         </div>
     </div>
     <% }); %>
@@ -74,7 +70,7 @@
     <% } else { %>
 
     <div class="col-xs-12">
-        <p>没有任何内容！</p>
+        <p>No content!</p>
     </div>
 
     <% } %>

@@ -1,4 +1,8 @@
-const AJAX_TIMEOUT = 1000;
+const AJAX_TIMEOUT = 1000 * 30;
+
+if (sessionStorage.getItem('hexo-status') === '1') {
+    $('#hexo-actions').addClass('running');
+}
 
 // 事件委托
 $.fn.multiOn = function (obj) {
@@ -78,6 +82,83 @@ $('#main-container').multiOn({
         },
         '#list-nav li': function () {
             $(this).parent().attr('data-select', $(this).attr('data-type'));
+        },
+        '#cli-hexo-server': function () {
+            var $this = $(this);
+            $this.attr('disabled', 'disabled');
+
+            $.ajax({
+                url: '/hexo-server',
+                method: 'get',
+                timeout: AJAX_TIMEOUT,
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    if (data && data.status && data.status == 'success') {
+                        bsAlert('success', 'hexo launch success! Visit：localhost:4000');
+                        $('#hexo-actions').addClass('running');
+                        sessionStorage.setItem('hexo-status', '1');
+                    } else {
+                        bsAlert('failed', 'hexo launch failed! Unknown!')
+                    }
+                    $this.removeAttr('disabled');
+                },
+                error: function (err) {
+                    bsAlert('danger', 'hexo launch failed!=err=' + JSON.stringify(err));
+                    $this.removeAttr('disabled');
+                }
+            });
+        },
+        '#cli-hexo-stop': function () {
+            var $this = $(this);
+            $this.attr('disabled', 'disabled');
+            $.ajax({
+                url: '/hexo-kill',
+                method: 'get',
+                timeout: AJAX_TIMEOUT,
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    if (data && data.status && data.status == 'success') {
+                        bsAlert('success', 'hexo killed!');
+                        $('#hexo-actions').removeClass('running');
+                        sessionStorage.setItem('hexo-status', '0');
+                    } else {
+                        bsAlert('failed', 'hexo failed to kill! Unknown!')
+                    }
+                    $this.removeAttr('disabled');
+                },
+                error: function (err) {
+                    bsAlert('success', 'hexo killed!');
+                    // bsAlert('danger', 'hexo failed to kill! err=' + JSON.stringify(err));
+                    $this.removeAttr('disabled');
+                    $('#hexo-actions').removeClass('running');
+                    sessionStorage.removeItem('hexo-status');
+                }
+            });
+        },
+        '#cli-hexo-deploy': function () {
+            var $this = $(this);
+            $this.attr('disabled', 'disabled');
+            $.ajax({
+                url: '/hexo-deploy',
+                method: 'get',
+                timeout: AJAX_TIMEOUT,
+                dataType: 'json',
+                cache: false,
+                success: function (data) {
+                    if (data && data.status && data.status == 'success') {
+                        bsAlert('success', 'hexo deployed!');
+                    } else {
+                        bsAlert('failed', 'hexo failed to deploy! Unknown!')
+                    }
+                    $this.removeAttr('disabled');
+                },
+                error: function (err) {
+                    bsAlert('danger', 'hexo failed to deploy! err=' + JSON.stringify(err));
+                    $this.removeAttr('disabled');
+                }
+            });
         }
     }
 });
@@ -93,8 +174,8 @@ $('#content-detail-body').multiOn({
             // 操作按钮
             $tools.addClass('collapse');
             setTimeout(function () {
-                $this.attr('id', 't-save').text('保存');
-                $('<li id="t-cancel" class="collapse">取消</li>').insertAfter($this);
+                $this.attr('id', 't-save').text('Save');
+                $('<li id="t-cancel" class="collapse">Cancel</li>').insertAfter($this);
 
                 $this.removeClass('collapse');
                 setTimeout(function () {
@@ -120,7 +201,7 @@ $('#content-detail-body').multiOn({
             $tools.addClass('collapse');
 
             setTimeout(function () {
-                $('#t-save').attr('id', 't-edit').text('编辑');
+                $('#t-save').attr('id', 't-edit').text('Edit');
                 $this.remove();
                 $tools.removeAttr('class');
             }, 400);
@@ -153,21 +234,21 @@ $('#content-detail-body').multiOn({
                         $content_detail.html($editor.val().trim());
 
                         setTimeout(function () {
-                            $this.attr('id', 't-edit').text('编辑');
+                            $this.attr('id', 't-edit').text('Edit');
                             $('#t-cancel').remove();
                             $tools.children('li').removeAttr('class');
-                            bsAlert('success', '保存成功！');
+                            bsAlert('success', 'Saved!');
                             refreshList(type);
                         }, 400);
                     }
                     else {
                         $this.removeClass('processing');
-                        bsAlert('warning', '发现未知问题！');
+                        bsAlert('warning', 'Unknown problem!');
                     }
                 },
                 error: function (err) {
                     $this.removeClass('processing');
-                    bsAlert('danger', '错误：' + err.responseJSON);
+                    bsAlert('danger', 'Error:' + err.responseJSON);
                 }
             });
         },
@@ -184,7 +265,7 @@ $('#content-detail-body').multiOn({
             $publishBtn.attr('disabled', 'disabled');
 
             if (!file_name || !isFilePathNameValid(file_name)) {
-                bsAlert('danger', '文件名/页面路径输入不正确');
+                bsAlert('danger', 'File name/page path wrong!');
                 $publishBtn.removeAttr('disabled');
                 $content_inner.removeClass('processing');
                 return false;
@@ -204,15 +285,15 @@ $('#content-detail-body').multiOn({
                 success: function (data) {
                     if (data.status && data.status == 'success') {
                         $('#close-detail').trigger('click');
-                        bsAlert('success', '发布成功！');
+                        bsAlert('success', 'Succeed!');
                         refreshList(type);
                     }
                     else {
-                        bsAlert('warning', '发现未知问题！');
+                        bsAlert('warning', 'Unknown problem!');
                     }
                 },
                 error: function (err) {
-                    bsAlert('danger', '错误：' + err.responseJSON.msg);
+                    bsAlert('danger', 'Error:' + err.responseJSON.msg);
                     $content_inner.removeClass('processing');
                     $publishBtn.removeAttr('disabled');
                 }
@@ -254,7 +335,7 @@ function moveFileTo(target_type) {
         index = $tool_wrap.attr('data-index');
 
     if (!type || !index) {
-        bsAlert('danger', '参数不正确！');
+        bsAlert('danger', 'Param error!');
         return;
     }
 
@@ -272,15 +353,15 @@ function moveFileTo(target_type) {
         success: function (data) {
             if (data.status && data.status == 'success') {
                 $('#close-detail').trigger('click');
-                bsAlert('success', data.msg || '移动成功');
+                bsAlert('success', data.msg || 'Success!');
                 refreshList(target_type);
             }
             else {
-                bsAlert('warning', 'moveFileTo 发现未知问题！');
+                bsAlert('warning', 'moveFileTo unknown problem!');
             }
         },
         error: function (err) {
-            bsAlert('danger', '错误：' + err.responseJSON.msg);
+            bsAlert('danger', 'Error:' + err.responseJSON.msg);
         }
     });
 }
@@ -311,16 +392,16 @@ function refreshList(type) {
                     }
                 }
 
-                $tagList.find('h3').text('共有 ' + data.tags.length + ' 个标签');
+                $tagList.find('h3').text(data.tags.length + ' tags');
                 $tagList.find('ul').html(tagList);
 
                 return;
             }
 
-            bsAlert('warning', 'refreshList 发现未知问题！');
+            bsAlert('warning', 'refreshList unknown problem!');
         },
         error: function (err) {
-            bsAlert('danger', '错误：' + err.responseJSON);
+            bsAlert('danger', 'Error:' + err.responseJSON);
         }
     });
 }

@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<div id="alert" class="alert alert-warning" role="alert">warning!保存失败</div>
+<div id="alert" class="alert alert-warning" role="alert"></div>
 
 <div id="content-detail-wrap">
     <div id="content-detail-inner">
@@ -46,28 +46,48 @@
             <div class="col-sm-3 col-sm-push-9">
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">写作</h3>
+                        <h3 class="panel-title">Actions</h3>
                     </div>
                     <div class="panel-body">
                         <button type="button" id="add-new" class="btn btn-default">
-                            <span class="glyphicon glyphicon-pencil"></span> 写文章
+                            <span class="glyphicon glyphicon-pencil"></span>
+                            Write new
+                        </button>
+                        <button type="button" class="view-config btn btn-default" data-type="site">
+                            View site config
+                        </button>
+                        <button type="button" class="view-config btn btn-default" data-type="theme">
+                            View theme config
                         </button>
                     </div>
                 </div>
 
-                <div class="panel panel-default">
+                <div id="hexo-actions" class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">查看配置文件</h3>
+                        <h3 class="panel-title">Hexo site actions</h3>
                     </div>
                     <div class="panel-body">
-                        <button type="button" class="view-config btn btn-default" data-type="site">站点配置</button>
-                        <button type="button" class="view-config btn btn-default" data-type="theme">主题配置</button>
+                        <p id="visit-hexo">
+                            Hexo is running! <a href="http://localhost:4000" target="_blank">Visit</a>
+                        </p>
+                        <button type="button" id="cli-hexo-server" class="btn btn-default" title="start hexo server">
+                            <span class="glyphicon glyphicon-play"></span>
+                            Start
+                        </button>
+                        <button type="button" id="cli-hexo-stop" class="btn btn-default" title="stop hexo server">
+                            <span class="glyphicon glyphicon-stop"></span>
+                            Stop
+                        </button>
+                        <button type="button" id="cli-hexo-deploy" class="btn btn-default" title="start hexo deploy">
+                            <span class="glyphicon glyphicon-cloud-upload"></span>
+                            Deploy
+                        </button>
                     </div>
                 </div>
 
                 <div id="tag-list" class="panel panel-default">
                     <div class="panel-heading">
-                        <h3 class="panel-title">共有 <%= data.tags.length %> 个标签</h3>
+                        <h3 class="panel-title"><%= data.tags.length %> tags</h3>
                     </div>
                     <div class="panel-body">
                         <ul class="list-inline list-action">

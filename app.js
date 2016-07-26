@@ -20,5 +20,5 @@ app.listen(PORT, function () {
     console.log('Hexo local admin app listening on port ' + PORT);
 });
 
-// 启动服务时默认跑一边数据 
+// 启动服务时默认跑一边数据
 require('./module/getAllData').updateDBFile();
