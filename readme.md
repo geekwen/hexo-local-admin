@@ -2,7 +2,9 @@
 
 This is a hexo site admin tool(works only on your local machine.). You can use this tool to manage your posts, pages, drafts and trash, even can launch hexo server and deploy your site! Try it out!
 
+![1](https://raw.githubusercontent.com/geekwen/hexo-local-admin/master/screenshot/1.jpg)
 
+![2](https://raw.githubusercontent.com/geekwen/hexo-local-admin/master/screenshot/2.jpg)
 
 **Requirement**
 
@@ -53,6 +55,10 @@ Browser: highly recommend **latest** chrome and firefox. also support any other 
     then open your browser and visit `localhost:4001`
 
 5. enjoy!
+
+## Notice
+
+1. The deploy button means run `hexo deploy -g` command. So before you use this feature, please make sure you can manually use this command to deploy your site. More info about hexo deploy: [hexo doc: deployment](https://hexo.io/docs/deployment.html) 
 
        
 ## License
