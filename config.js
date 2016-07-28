@@ -1,14 +1,12 @@
-// todo 先得检查hexo root path 和 theme 有没有设置
-
 module.exports = (function () {
     var path = require('path'),
         config = {};
 
     // hexo dir path
-    config.rootPath = "/Users/Geekwen/Sites/test/hexo";
+    config.rootPath = "your_hexo_path";
 
     // theme dir name
-    config.theme = "landscape";
+    config.theme = "your_theme_dir_name";
 
     // do not edit anything below
     config.adminPath = __dirname;
