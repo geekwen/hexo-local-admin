@@ -265,7 +265,7 @@ $('#content-detail-body').multiOn({
             $publishBtn.attr('disabled', 'disabled');
 
             if (!file_name || !isFilePathNameValid(file_name)) {
-                bsAlert('danger', 'File name/page path wrong!');
+                bsAlert('danger', 'File name/page PATH wrong!');
                 $publishBtn.removeAttr('disabled');
                 $content_inner.removeClass('processing');
                 return false;

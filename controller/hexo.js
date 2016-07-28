@@ -1,6 +1,6 @@
 const CHILD_PROCESS = require('child_process'),
-    bf = require('buffer'),
-    HEXO_PATH = require('../config');
+    LOGGER = require('log4js').getLogger(),
+    HEXO_PATH = require('../module/config-init').data();
 
 var hexo_server = null;
 
@@ -19,11 +19,11 @@ exports.server = function (req, res) {
         );
 
         clean.stdout.on('data', function (data) {
-            console.log(data.toString('utf8'));
+            LOGGER.info(data.toString('utf8'));
         });
 
         clean.on('exit', function () {
-            console.log('hexo cleaned!');
+            LOGGER.info('hexo cleaned!');
 
             hexo_server = CHILD_PROCESS.spawn(
                 'hexo',
@@ -32,11 +32,11 @@ exports.server = function (req, res) {
             );
 
             hexo_server.stdout.on('data', function (data) {
-                console.log(data.toString('utf8'));
+                LOGGER.info(data.toString('utf8'));
             });
 
             hexo_server.on('exit', function () {
-                console.log('hexo stopped!');
+                LOGGER.info('hexo stopped!');
                 hexo_server = null;
             });
             res.json({"status": "success"});
@@ -68,11 +68,11 @@ exports.deploy = function (req, res) {
         );
 
         hexo_deploy.stdout.on('data', function (data) {
-            console.log(data.toString('utf8'));
+            LOGGER.info(data.toString('utf8'));
         });
 
         hexo_deploy.on('exit', function () {
-            console.log('hexo deployed!');
+            LOGGER.info('hexo deployed!');
             res.json({"status": "success"});
         });
     }

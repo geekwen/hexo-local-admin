@@ -20,41 +20,38 @@ Browser: highly recommend **latest** chrome and firefox. also support any other 
 
 0. **Please backup your `_source` directory, just for safety**
 
-1. Front matter format **must** follow: https://github.com/dworthen/js-yaml-front-matter (otherwise, this app may not work)
+1. Front matter format **must** follow: https://github.com/dworthen/js-yaml-front-matter (otherwise, this APP may not work)
 
 2. npm scripts:
-    1. `npm run start`: start the app
+    1. `npm run start`: start the APP
     2. `npm run build`: build js file
 
 ## HOW-TO-USE
 
-1. clone project, then 
-
+1. install 
     ``` shell
-    cd project_dir
-    npm install
+    npm install -g hexo-local-admin
     ```
 
-2. open config.js, and edit attributes below:
+2. use command 
 
     ```
-    config.rootPath = "your_hexo_path";
+    hexo-admin -h
+    ```
+    will get:
+    ```
+    Usage: hexo-admin [options] [command]
+    Commands:
+      start   Start hexo local admin server
+    Options:
+        -h, --help                     output usage information
+        -V, --version                  output the version number
+        -r, --root-path [root_path]    view/set hexo root path
+        -t, --theme-name [theme_name]  view/set hexo theme name
 
-    config.theme = "your_theme";
     ```
 
-3. `npm run start`
-
-4. if you get:
- 
-    ``` shell
-    Hexo local admin app listening on port 4001
-    [2016/7/26 10:41:12] __siteDB.json update!
-    ```
-
-    then open your browser and visit `localhost:4001`
-
-5. enjoy!
+3. enjoy!
 
 ## Notice
 

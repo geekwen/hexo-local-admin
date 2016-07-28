@@ -1,24 +1,25 @@
-const PORT = 4001;
+const PORT = 4001,
+    EXPRESS = require('express'),
+    BODY_PARSER = require('body-parser'),
+    FS = require('fs'),
+    PATH = require('path'),
+    LOGGER = require('log4js').getLogger(),
+    APP = EXPRESS();
 
-var fs = require('fs'),
-    path = require('path'),
-    express = require('express'),
-    body_parser = require('body-parser'),
-    app = express();
-
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views/ejs'));
-app.use(express.static('views/public'));
-app.use(body_parser.urlencoded({extended: true}));
-app.use(body_parser.json());
+APP.set('view engine', 'ejs');
+APP.set('views', PATH.join(__dirname, 'views/ejs'));
+APP.use(EXPRESS.static('views/public'));
+APP.use(BODY_PARSER.urlencoded({extended: true}));
+APP.use(BODY_PARSER.json());
 
 require('./route/route.json').forEach(function (route) {
-    app[route.method](route.path, require(path.join(__dirname, 'controller', route.module))[route.handler])
+    APP[route.method](route.path, require(PATH.join(__dirname, 'controller', route.module))[route.handler])
 });
 
-app.listen(PORT, function () {
-    console.log('Hexo local admin app listening on port ' + PORT);
+APP.listen(PORT, function () {
+    LOGGER.info('Hexo local admin is working! Please visit localhost:' + PORT);
+    LOGGER.info('press CTL + C to stop');
 });
 
 // 启动服务时默认跑一边数据
-require('./module/getAllData').updateDBFile();
+require('./module/get-all-data').updateDBFile();

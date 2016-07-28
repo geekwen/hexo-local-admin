@@ -11,6 +11,9 @@
     "build": "webpack --progress -p",
     "debug": "webpack --progress -d --watch"
   },
+  "bin": {
+    "hexo-admin": "./bin/cli.js"
+  },
   "keywords": [
     "hexo",
     "admin"
@@ -21,10 +24,12 @@
   },
   "dependencies": {
     "body-parser": "^1.15.2",
+    "commander": "^2.9.0",
     "ejs": "^2.4.2",
     "ejs-compiled-loader": "^2.1.1",
     "express": "^4.14.0",
     "extend": "^3.0.0",
+    "log4js": "^0.6.38",
     "yaml-front-matter": "^3.4.0"
   }
 }

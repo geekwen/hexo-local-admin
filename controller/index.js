@@ -1,8 +1,7 @@
-const HEXO_PATH = require('../config');
-
-var path = require('path'),
-    fs = require('fs'),
-    getAllData = require('../module/getAllData');
+const HEXO_PATH = require('../module/config-init').data(),
+    PATH = require('path'),
+    FS = require('fs'),
+    GET_ALL_DATA = require('../module/get-all-data');
 
 exports.entry = function (req, res) {
     deleteDBCache();
@@ -61,8 +60,8 @@ exports.writeMarkdownFile = function (req, res) {
             file_name = file_in_DB.file_name;
 
             file_type === 'pages' ?
-                file_path = path.join(HEXO_PATH.sourcePath, file_in_DB.page_url, file_name) :
-                file_path = path.join(HEXO_PATH.sourcePath, '_' + file_type, file_name);
+                file_path = PATH.join(HEXO_PATH.sourcePath, file_in_DB.page_url, file_name) :
+                file_path = PATH.join(HEXO_PATH.sourcePath, '_' + file_type, file_name);
 
             writeFile(file_path);
         }
@@ -70,17 +69,17 @@ exports.writeMarkdownFile = function (req, res) {
             file_name = body.file_name;
 
             if (file_type === 'pages') {
-                file_path = path.join(HEXO_PATH.sourcePath, file_name);
+                file_path = PATH.join(HEXO_PATH.sourcePath, file_name);
 
-                fs.access(file_path, fs.F_OK, function (err) {
+                FS.access(file_path, FS.F_OK, function (err) {
                     if (err) {
                         try {
-                            fs.mkdirSync(file_path);
-                            file_path = path.join(file_path, 'index.md');
+                            FS.mkdirSync(file_path);
+                            file_path = PATH.join(file_path, 'index.md');
                             writeFile(file_path);
                         }
                         catch (e) {
-                            throw 'create path failed:' + file_path;
+                            throw 'create PATH failed:' + file_path;
                         }
                     }
                     else {
@@ -90,9 +89,9 @@ exports.writeMarkdownFile = function (req, res) {
             }
 
             else if (file_type === 'posts' || file_type === 'drafts') {
-                file_path = path.join(HEXO_PATH[file_type.replace(/s$/, '') + 'Path'], file_name + '.md');
+                file_path = PATH.join(HEXO_PATH[file_type.replace(/s$/, '') + 'Path'], file_name + '.md');
 
-                fs.access(file_path, fs.F_OK, function (err) {
+                FS.access(file_path, FS.F_OK, function (err) {
                     if (err) {
                         writeFile(file_path);
                     }
@@ -108,10 +107,10 @@ exports.writeMarkdownFile = function (req, res) {
         }
 
         function writeFile(filePath) {
-            fs.writeFile(filePath, file_content, 'utf-8', function (err) {
+            FS.writeFile(filePath, file_content, 'utf-8', function (err) {
                 if (err) res.status(500).send({status: 'error', msg: 'file write err!'});
 
-                getAllData.updateDBFile();
+                GET_ALL_DATA.updateDBFile();
                 res.json({status: 'success'});
             });
         }
@@ -142,12 +141,12 @@ exports.moveMarkdownFile = function (req, res) {
     switch (type) {
         case 'pages':
             file_name = file.page_url + '.md';
-            oldPath = path.join(HEXO_PATH.sourcePath, file.page_url, 'index.md');
-            newPath = path.join(HEXO_PATH[target_type + 'Path'], file_name);
+            oldPath = PATH.join(HEXO_PATH.sourcePath, file.page_url, 'index.md');
+            newPath = PATH.join(HEXO_PATH[target_type + 'Path'], file_name);
 
-            fs.access(
+            FS.access(
                 newPath,
-                fs.F_OK,
+                FS.F_OK,
                 function (err) {
                     if (err) {
                         moveFile(
@@ -156,8 +155,8 @@ exports.moveMarkdownFile = function (req, res) {
 
                             // 移动完成后，需要删除原来的空文件夹
                             function () {
-                                fs.rmdir(
-                                    path.join(HEXO_PATH.sourcePath, file.page_url),
+                                FS.rmdir(
+                                    PATH.join(HEXO_PATH.sourcePath, file.page_url),
                                     function (err) {
                                         if (err) throw err;
                                     }
@@ -175,10 +174,10 @@ exports.moveMarkdownFile = function (req, res) {
         case 'drafts':
         case 'trash':
             file_name = file.file_name;
-            oldPath = path.join(HEXO_PATH[type.replace(/s$/, '') + 'Path'], file_name);
+            oldPath = PATH.join(HEXO_PATH[type.replace(/s$/, '') + 'Path'], file_name);
 
             if (type === 'trash' && target_type === 'trash') {
-                fs.unlink(
+                FS.unlink(
                     oldPath,
                     function (err) {
                         if (err) {
@@ -186,25 +185,25 @@ exports.moveMarkdownFile = function (req, res) {
                             throw err;
                         }
 
-                        getAllData.updateDBFile();
+                        GET_ALL_DATA.updateDBFile();
                         res.json({"status": "success", "msg": "删除成功！"});
                     }
                 )
             }
             else {
                 if (target_type === 'page') {
-                    newPath = path.join(HEXO_PATH.sourcePath, file_name.replace(/\.md$/, ''));
+                    newPath = PATH.join(HEXO_PATH.sourcePath, file_name.replace(/\.md$/, ''));
 
-                    fs.access(
+                    FS.access(
                         newPath,
-                        fs.F_OK,
+                        FS.F_OK,
                         function (err) {
                             if (err) {
-                                fs.mkdir(
+                                FS.mkdir(
                                     newPath,
                                     function (err) {
                                         if (err) throw err;
-                                        moveFile(oldPath, path.join(newPath, 'index.md'));
+                                        moveFile(oldPath, PATH.join(newPath, 'index.md'));
                                     }
                                 )
                             }
@@ -215,11 +214,11 @@ exports.moveMarkdownFile = function (req, res) {
                     );
                 }
                 else {
-                    newPath = path.join(HEXO_PATH[target_type + 'Path'], file_name);
+                    newPath = PATH.join(HEXO_PATH[target_type + 'Path'], file_name);
 
-                    fs.access(
+                    FS.access(
                         newPath,
-                        fs.F_OK,
+                        FS.F_OK,
                         function (err) {
                             if (err) {
                                 moveFile(oldPath, newPath);
@@ -237,7 +236,7 @@ exports.moveMarkdownFile = function (req, res) {
     }
 
     function moveFile(oldPath, newPath, fn) {
-        fs.rename(
+        FS.rename(
             oldPath,
             newPath,
             function (err) {
@@ -248,7 +247,7 @@ exports.moveMarkdownFile = function (req, res) {
 
                 if (fn && typeof fn === 'function') fn();
 
-                getAllData.updateDBFile();
+                GET_ALL_DATA.updateDBFile();
                 res.json({"status": "success"});
             }
         );
@@ -256,5 +255,5 @@ exports.moveMarkdownFile = function (req, res) {
 };
 
 function deleteDBCache() {
-    delete require.cache[path.join(HEXO_PATH.adminPath, '__siteDB.json')];
+    delete require.cache[PATH.join(HEXO_PATH.adminPath, '__siteDB.json')];
 }
