@@ -4,7 +4,6 @@ const PROGRAM = require('commander'),
     FS = require('fs'),
     PATH = require('path'),
     CHILD_PROCESS = require('child_process'),
-    LOGGER = require('log4js').getLogger(),
     CONFIG_INIT = require('../module/config-init');
 
 var config = require('../config'), data;
