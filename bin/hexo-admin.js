@@ -8,7 +8,7 @@ const PROGRAM = require('commander'),
 
 var config = require('../config'), data;
 
-PROGRAM.version('1.2.0');
+PROGRAM.version(require('../package.json').version);
 
 PROGRAM.command('start')
     .description('Start hexo local admin server')
