@@ -12,7 +12,7 @@
     "debug": "webpack --progress -d --watch"
   },
   "bin": {
-    "hexo-admin": "./bin/cli.js"
+    "hexo-admin": "./bin/hexo-admin.js"
   },
   "keywords": [
     "hexo",
