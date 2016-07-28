@@ -1,6 +1,6 @@
 {
   "name": "hexo-local-admin",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "A hexo local admin tool",
   "main": "app.js",
   "author": "geekwen",
