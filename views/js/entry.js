@@ -128,7 +128,7 @@ $('#main-container').multiOn({
                     }
                     $this.removeAttr('disabled');
                 },
-                error: function (err) {
+                error: function () {
                     bsAlert('success', 'hexo killed!');
                     // bsAlert('danger', 'hexo failed to kill! err=' + JSON.stringify(err));
                     $this.removeAttr('disabled');
@@ -353,7 +353,7 @@ function moveFileTo(target_type) {
         success: function (data) {
             if (data.status && data.status == 'success') {
                 $('#close-detail').trigger('click');
-                bsAlert('success', data.msg || 'Success!');
+                bsAlert('success', 'Success!');
                 refreshList(target_type);
             }
             else {

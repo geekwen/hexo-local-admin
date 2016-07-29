@@ -1,6 +1,7 @@
 const HEXO_PATH = require('../module/config-init').data(),
     PATH = require('path'),
     FS = require('fs'),
+    LOGGER = require('log4js').getLogger(),
     GET_ALL_DATA = require('../module/get-all-data');
 
 exports.entry = function (req, res) {
@@ -10,6 +11,7 @@ exports.entry = function (req, res) {
 
 exports.getAll = function (req, res) {
     deleteDBCache();
+    LOGGER.info('get db content');
     res.json({status: "success", data: require('../__siteDB.json')});
 };
 
@@ -19,12 +21,18 @@ exports.getMarkdownFile = function (req, res) {
         DB = require('../__siteDB.json');
 
     if (query.type && !Number.isNaN(Number(query.index))) {
-        DB[query.type][query.index] ?
-            res.json(DB[query.type][query.index]) :
-            res.status(500).send({"type": "error", "msg": "没有找到文章！", "param": query});
+        if (DB[query.type][query.index]) {
+            LOGGER.info('getting:' + DB[query.type][query.index].file_path);
+            res.json(DB[query.type][query.index]);
+        }
+        else {
+            LOGGER.error("Didn't find post!");
+            res.status(500).send({"type": "error", "msg": "Didn't find post!", "param": query});
+        }
     }
     else {
-        res.status(500).send({"type": "error", "msg": "参数不正确！", "param": query});
+        LOGGER.error('get markdown file param error! param:' + JSON.stringify(query));
+        res.status(500).send({"type": "error", "msg": "Param error！", "param": query});
     }
 };
 
@@ -34,13 +42,16 @@ exports.getConfig = function (req, res) {
         DB = require('../__siteDB.json');
 
     if (query.type == 'site') {
+        LOGGER.info('getting:' + DB.siteConfig.file_path);
         res.json(DB.siteConfig);
     }
     else if (query.type = 'theme') {
+        LOGGER.info('getting:' + DB.themeConfig.file_path);
         res.json(DB.themeConfig);
     }
     else {
-        res.status(500).send({"msg": "类型不正确！", "param": query});
+        LOGGER.warn('wrong config type:' + JSON.stringify(query));
+        res.status(500).send({"msg": "wrong type", "param": query});
     }
 };
 
@@ -83,7 +94,8 @@ exports.writeMarkdownFile = function (req, res) {
                         }
                     }
                     else {
-                        res.status(500).send({status: 'error', msg: '路径:' + file_name + ' 已存在'});
+                        LOGGER.warn('page path is already exist:source/' + file_name);
+                        res.status(500).send({status: 'error', msg: 'page path is already exist:source/' + file_name});
                     }
                 });
             }
@@ -96,27 +108,34 @@ exports.writeMarkdownFile = function (req, res) {
                         writeFile(file_path);
                     }
                     else {
-                        res.status(500).send({status: 'error', msg: '文件:' + file_name + '.md 已存在'});
+                        LOGGER.warn('file is already exist:' + file_name);
+                        res.status(500).send({status: 'error', msg: 'file is already exist:' + file_name + '.md'});
                     }
                 });
             }
 
             else {
-                res.status(500).send({status: 'error', msg: '文章类型不正确！'});
+                LOGGER.error('wrong post type');
+                res.status(500).send({status: 'error', msg: 'Wrong type!'});
             }
         }
 
         function writeFile(filePath) {
             FS.writeFile(filePath, file_content, 'utf-8', function (err) {
-                if (err) res.status(500).send({status: 'error', msg: 'file write err!'});
+                if (err) {
+                    LOGGER.error('write file:' + filePath + ' error! error:' + JSON.stringify(err));
+                    res.status(500).send({status: 'error', msg: 'file write err!'});
+                }
 
+                LOGGER.info('write file:' + filePath + ' succeed');
                 GET_ALL_DATA.updateDBFile();
                 res.json({status: 'success'});
             });
         }
     }
     else {
-        res.status(500).send({status: 'error', msg: '没有收到参数！'});
+        LOGGER.error('didn\'t receive param');
+        res.status(500).send({status: 'error', msg: 'Didn\'t receive param'});
     }
 };
 
@@ -132,7 +151,8 @@ exports.moveMarkdownFile = function (req, res) {
         var file = DB[type][index];
     }
     catch (e) {
-        res.status(500).send({"status": "error", "msg": "DB中没有找到该文章！"});
+        LOGGER.error('didn\'t find post!');
+        res.status(500).send({"status": "error", "msg": "Didn't find post!"});
         throw e;
     }
 
@@ -158,14 +178,19 @@ exports.moveMarkdownFile = function (req, res) {
                                 FS.rmdir(
                                     PATH.join(HEXO_PATH.sourcePath, file.page_url),
                                     function (err) {
-                                        if (err) throw err;
+                                        if (err) {
+                                            LOGGER.warn('can\'t rmdir:' + PATH.join(HEXO_PATH.sourcePath, file.page_url));
+                                            throw err;
+                                        }
+                                        LOGGER.info('rmdir:' + PATH.join(HEXO_PATH.sourcePath, file.page_url));
                                     }
                                 );
                             }
                         );
                     }
                     else {
-                        res.status(500).send({"status": "error", "msg": target_type + "中存在同名文件！"});
+                        LOGGER.error(newPath + " already exist!");
+                        res.status(500).send({"status": "error", "msg": newPath + " already exist!"});
                     }
                 }
             );
@@ -181,12 +206,14 @@ exports.moveMarkdownFile = function (req, res) {
                     oldPath,
                     function (err) {
                         if (err) {
-                            res.status(500).send({"status": "error", "msg": "删除文件失败！"});
+                            LOGGER.error('failed to delete file:' + oldPath);
+                            res.status(500).send({"status": "error", "msg": "failed to delete file:" + oldPath});
                             throw err;
                         }
 
+                        LOGGER.info('delete:' + oldPath + ' succeed');
                         GET_ALL_DATA.updateDBFile();
-                        res.json({"status": "success", "msg": "删除成功！"});
+                        res.json({"status": "success", "msg": "delete:" + oldPath + " succeed"});
                     }
                 )
             }
@@ -208,7 +235,8 @@ exports.moveMarkdownFile = function (req, res) {
                                 )
                             }
                             else {
-                                res.status(500).send({"status": "error", "msg": target_type + "中已有相同的路径！"});
+                                LOGGER.error(newPath + " already exist!");
+                                res.status(500).send({"status": "error", "msg": newPath + " already exist!"});
                             }
                         }
                     );
@@ -224,7 +252,8 @@ exports.moveMarkdownFile = function (req, res) {
                                 moveFile(oldPath, newPath);
                             }
                             else {
-                                res.status(500).send({"status": "error", "msg": target_type + "中存在同名文件！"});
+                                LOGGER.error(newPath + " already exist!");
+                                res.status(500).send({"status": "error", "msg": newPath + " already exist!"});
                             }
                         }
                     );
@@ -232,7 +261,8 @@ exports.moveMarkdownFile = function (req, res) {
             }
             break;
         default:
-            res.status(500).send({"status": "error", "msg": "不支持改操作！"})
+            LOGGER.error("option doesn't support!param:" + JSON.stringify(body));
+            res.status(500).send({"status": "error", "msg": "option doesn't support!param:" + JSON.stringify(body)});
     }
 
     function moveFile(oldPath, newPath, fn) {
@@ -241,12 +271,14 @@ exports.moveMarkdownFile = function (req, res) {
             newPath,
             function (err) {
                 if (err) {
-                    res.status(500).send({"status": "error", "msg": "移动文件失败！"});
+                    LOGGER.error('Failed to move file:' + oldPath + ' to ' + newPath);
+                    res.status(500).send({"status": "error", "msg": "Move file failed"});
                     throw err;
                 }
 
                 if (fn && typeof fn === 'function') fn();
 
+                LOGGER.info('Move file:' + oldPath + ' to ' + newPath);
                 GET_ALL_DATA.updateDBFile();
                 res.json({"status": "success"});
             }
