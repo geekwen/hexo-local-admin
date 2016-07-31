@@ -4,10 +4,11 @@ const PROGRAM = require('commander'),
     FS = require('fs'),
     PATH = require('path'),
     CHILD_PROCESS = require('child_process'),
-    CONFIG_INIT = require('../module/config-init');
+    CONFIG_INIT = require('../module/config-init'),
+    OS = require('os');
 
-var config = require('../config.json'),
-    configPath = PATH.join(__dirname, '..', 'config.json'),
+var configPath = PATH.join(OS.homedir(), '.hexo-local-admin-config.json'),
+    config = CONFIG_INIT.data(),
     data;
 
 PROGRAM.version(require('../package.json').version);
@@ -26,26 +27,20 @@ function start() {
     var isPathReady = CONFIG_INIT.isPathReady();
     if (!isPathReady.status) {
         console.log(isPathReady.msg);
-        process.exit(0);
+        process.exit(1);
     }
     else {
         console.log('ready to start');
-        var app = CHILD_PROCESS.spawn(
-            'node',
-            ['app.js'],
-            {
-                cwd: PATH.join(__dirname, '..')
-            }
+        var app = CHILD_PROCESS.fork(
+            'app.js',
+            [],
+            {cwd: PATH.join(__dirname, '..')}
         );
 
         console.log("pid:" + app.pid);
 
-        app.stdout.on('data', function (data) {
-            console.log(data.toString('utf8'));
-        });
-
-        app.on('exit', function () {
-            console.log('bye!');
+        app.on('error', function (e) {
+            console.log(e);
         });
     }
 }

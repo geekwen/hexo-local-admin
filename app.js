@@ -23,3 +23,8 @@ APP.listen(PORT, function () {
 
 // 启动服务时默认跑一边数据
 require('./module/get-all-data').updateDBFile();
+
+process.on('SIGINT', function() {
+    console.log('\nBye, hope to see you again.');
+    process.exit(0);
+});

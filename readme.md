@@ -20,11 +20,11 @@ Browser: highly recommend **latest** chrome and firefox. also support any other 
 
 0. **Please backup your `_source` directory, just for safety**
 
-1. Front matter format **must** follow: https://github.com/dworthen/js-yaml-front-matter (otherwise, this APP may not work)
+1. Front matter format **must** follow: https://github.com/dworthen/js-yaml-front-matter (otherwise, this APP may not work right)
 
-2. npm scripts:
-    1. `npm run start`: start the APP
-    2. `npm run build`: build js file
+2. The deploy button means run `hexo deploy -g` command. So before you use this feature, please make sure you can manually use this command to deploy your site. More info about hexo deploy: [hexo doc: deployment](https://hexo.io/docs/deployment.html)
+ 
+3. (\*nix os) if you can't set root path or theme name, try add `sudo` before command. 
 
 ## HOW-TO-USE
 
@@ -53,13 +53,6 @@ Browser: highly recommend **latest** chrome and firefox. also support any other 
 
 3. enjoy!
 
-## Notice
-
-1. The deploy button means run `hexo deploy -g` command. So before you use this feature, please make sure you can manually use this command to deploy your site. More info about hexo deploy: [hexo doc: deployment](https://hexo.io/docs/deployment.html)
- 
-2. (\*nix os) if you can't set root path or theme name, try add `sudo` before command. 
-
-       
 ## License
 
 MIT

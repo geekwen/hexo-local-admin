@@ -1,7 +1,24 @@
 const FS = require('fs'),
-    PATH = require('path');
+    PATH = require('path'),
+    OS = require('os');
 
-var config = require('../config.json');
+var configPath = PATH.join(OS.homedir(), '.hexo-local-admin-config.json');
+
+try {
+    config = require(configPath);
+}
+catch (e) {
+    try {
+        FS.writeFileSync(configPath, {"rootPath": ".", "theme": "."}, 'utf-8');
+        config = {
+            rootPath: '.',
+            theme: '.'
+        }
+    }
+    catch (e) {
+        throw e;
+    }
+}
 
 exports.isPathReady = function () {
     if (config.rootPath === '.') {
