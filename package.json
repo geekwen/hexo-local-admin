@@ -30,6 +30,7 @@
     "express": "^4.14.0",
     "extend": "^3.0.0",
     "log4js": "^0.6.38",
+    "tree-kill": "^1.1.0",
     "yaml-front-matter": "^3.4.0"
   }
 }

@@ -2,7 +2,11 @@ const FS = require('fs'),
     PATH = require('path'),
     OS = require('os');
 
-var configPath = PATH.join(OS.homedir(), '.hexo-local-admin-config.json');
+var configPath;
+
+/^win/.test(OS.platform()) ?
+    configPath = PATH.join(OS.homedir(), 'Documents', '.hexo-local-admin-config.json') :
+    configPath = PATH.join(OS.homedir(), '.hexo-local-admin-config.json');
 
 try {
     config = require(configPath);
@@ -49,6 +53,7 @@ exports.isPathReady = function () {
 };
 
 exports.data = function () {
+    config.configPath = configPath;
     config.adminPath = PATH.join(__dirname, '..');
     config.siteConfig = PATH.join(config.rootPath, '_config.yml');
     config.themeConfig = PATH.join(config.rootPath, 'themes', config.theme, '_config.yml');
