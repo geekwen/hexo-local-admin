@@ -231,7 +231,7 @@ $('#content-detail-body').multiOn({
                 success: function (data) {
                     if (data.status && data.status == 'success') {
                         $tools.children('li').addClass('collapse');
-                        $content_detail.html($editor.val().trim());
+                        $content_detail.text($editor.val().trim());
 
                         setTimeout(function () {
                             $this.attr('id', 't-edit').text('Edit');
