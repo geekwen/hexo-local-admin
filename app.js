@@ -17,7 +17,7 @@ require('./route/route.json').forEach(function (route) {
 });
 
 APP.listen(PORT, function () {
-    LOGGER.info('Hexo local admin is working! Please visit localhost:' + PORT);
+    LOGGER.info('Hexo local admin is working! Please visit http://localhost:' + PORT);
     LOGGER.info('press CTL + C to stop');
 });
 

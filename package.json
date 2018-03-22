@@ -29,8 +29,9 @@
     "ejs-compiled-loader": "^2.1.1",
     "express": "^4.14.0",
     "extend": "^3.0.0",
+    "hexo-front-matter": "^0.2.3",
     "log4js": "^0.6.38",
-    "tree-kill": "^1.1.0",
-    "yaml-front-matter": "^3.4.0"
+    "node-dir": "^0.1.17",
+    "tree-kill": "^1.1.0"
   }
 }

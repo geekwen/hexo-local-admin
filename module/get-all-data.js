@@ -4,14 +4,15 @@
  */
 
 const HEXO_PATH = require('../module/config-init').data(),
-    YAML_FM = require('yaml-front-matter'),
+    FRONT_MATTER = require('hexo-front-matter'),
     FS = require('fs'),
+    DIR = require('node-dir'),
     PATH = require('path'),
     EXTEND = require('extend'),
     LOGGER = require('log4js').getLogger();
 
 exports.updateDBFile = function () {
-    var flagIndex = 0;
+    let flagIndex = 0;
 
     // 初始化 _posts, _drafts, _trash文件夹
     ['post', 'draft', 'trash'].forEach(function (item) {
@@ -37,89 +38,78 @@ exports.updateDBFile = function () {
     });
 
     function action() {
-        var siteData = {
-            hexoPath: HEXO_PATH.rootPath,
-            theme: HEXO_PATH.theme,
-            posts: getDirMdFiles(HEXO_PATH.postPath),
-            drafts: getDirMdFiles(HEXO_PATH.draftPath),
-            trash: getDirMdFiles(HEXO_PATH.trashPath),
-            pages: getPages(),
-            themeConfig: {
-                title: 'Theme Config',
-                file_path: HEXO_PATH.themeConfig,
-                raw_content: getFile(HEXO_PATH.themeConfig)
-            },
-            siteConfig: {
-                title: 'Site Config',
-                file_path: HEXO_PATH.siteConfig,
-                raw_content: getFile(HEXO_PATH.siteConfig)
-            }
-        };
+        let loadingProcess = 0,
+            siteData = {
+                hexoPath: HEXO_PATH.rootPath,
+                theme: HEXO_PATH.theme,
+                themeConfig: {
+                    title: 'Theme Config',
+                    file_path: HEXO_PATH.themeConfig,
+                    raw_content: getFile(HEXO_PATH.themeConfig)
+                },
+                siteConfig: {
+                    title: 'Site Config',
+                    file_path: HEXO_PATH.siteConfig,
+                    raw_content: getFile(HEXO_PATH.siteConfig)
+                }
+            };
 
-        siteData.tags = getTagData(siteData.posts);
+        getMdFiles(HEXO_PATH.postPath, null, function (dataArr) {
+            siteData.posts = dataArr;
+            done();
+        });
+        getMdFiles(HEXO_PATH.draftPath, null, function (dataArr) {
+            siteData.drafts = dataArr;
+            done();
+        });
+        getMdFiles(HEXO_PATH.trashPath, null, function (dataArr) {
+            siteData.trash = dataArr;
+            done();
+        });
+        getMdFiles(HEXO_PATH.sourcePath, {
+            match: /index\.md$/,
+            excludeDir: ['_drafts', '_posts', '_trash']
+        }, function (dataArr) {
+            siteData.pages = dataArr;
+            done();
+        });
 
-        FS.writeFile(
-            PATH.join(HEXO_PATH.adminPath, '__siteDB.json'),
-            JSON.stringify(siteData),
-            function (err) {
-                if (err) throw err;
-                LOGGER.info('__siteDB.json update!');
+        function done() {
+            if (++loadingProcess === 4) {
+                siteData.tags = getTagData(siteData.posts);
+                FS.writeFile(
+                    PATH.join(HEXO_PATH.adminPath, '__siteDB.json'),
+                    JSON.stringify(siteData),
+                    function (err) {
+                        if (err) throw err;
+                        LOGGER.info('__siteDB.json update!');
+                    }
+                );
             }
-        );
+        }
     }
 };
 
 /**
- * 读取某个目录下的markdown文件
+ * 读取 markdown 文件
  * @param {string} dirPath - 文件路径
+ * @param {object} match - 匹配文件
+ * @param {function} callback
  * @returns {object[]} array of file content
  * */
-function getDirMdFiles(dirPath) {
-    var data = [];
+function getMdFiles(dirPath, match, callback) {
+    let data = [];
 
-    try {
-        FS.readdirSync(dirPath).forEach(function (file_name) {
-            // 过滤掉非md结尾的文件
-            if (file_name.search(/\.md$/) === -1) return;
-            data.push(getPostFileContent(dirPath, file_name));
+    DIR.readFiles(dirPath, match || {match: /.md$/},
+        function (err, content, filename, next) {
+            if (err) throw err;
+            data.push(EXTEND(parseFileContent(filename, content), {page_url: filename.replace(/^.*source\//g, '')}));
+            next();
+        },
+        function (err, files) {
+            if (err) throw err;
+            callback(data.sort(sortListFromNewToOld));
         });
-    }
-    catch (err) {
-        throw err;
-    }
-
-    // 最新的排最前面
-    return data.sort(sortListFromNewToOld);
-}
-
-/**
- * 获取所有的页面，注意：仅支持source/page-PATH/index.md这种单一的方式
- * @returns {object[]} array of page content
- * */
-function getPages() {
-    var data = [],
-        sourcePath = HEXO_PATH.sourcePath,
-        itemNames;
-
-    try {
-        itemNames = FS.readdirSync(sourcePath);
-    }
-    catch (err) {
-        throw err;
-    }
-
-    itemNames.forEach(function (itemName) {
-        try {
-            if (FS.lstatSync(PATH.join(sourcePath, itemName)).isDirectory() && itemName.search(/^_/) === -1) {
-                data.push(EXTEND(getPostFileContent(PATH.join(sourcePath, itemName), 'index.md'), {page_url: itemName}));
-            }
-        }
-        catch (e) {
-            if (e.code !== 'ENOENT') console.error(e);
-        }
-    });
-
-    return data.sort(sortListFromNewToOld);
 }
 
 /**
@@ -141,29 +131,20 @@ function getFile(filePath) {
 }
 
 /**
- * 读取文章文件，并对内容进行分析、整理
- * @param   {string}  dirPath                 完整的文件路径（绝对路径）
- * @param   {string}  fileName                完整的文件名（包括后缀）
- * @return  {object}  文件对象
+ * 对文章内容进行整理
+ * @param fileNameWithPath {string} file name with path
+ * @param content {string} file content
  * */
-function getPostFileContent(dirPath, fileName) {
-    if (fileName.search(/\.md$/) === -1) return null;
-    var file = {
-        file_name: fileName,
-        file_path: PATH.join(dirPath, fileName)
+function parseFileContent(fileNameWithPath, content) {
+    let file = {
+        file_name: fileNameWithPath.replace(/^.*\//g, ''),
+        file_path: fileNameWithPath,
+        raw_content: content
     };
-
-    try {
-        file.raw_content = FS.readFileSync(file.file_path, 'utf-8');
-        EXTEND(file, YAML_FM.loadFront(file.raw_content));
-
-        // todo 如果没有时间，则设置文件创建时间
-        file.date_unix = Date.parse(file.date);
-        return file;
-    }
-    catch (e) {
-        throw e;
-    }
+    EXTEND(file, FRONT_MATTER(content));
+    // todo 如果没有时间，则设置文件创建时间
+    file.date_unix = Date.parse(file.date) || 0;
+    return file;
 }
 
 /**
